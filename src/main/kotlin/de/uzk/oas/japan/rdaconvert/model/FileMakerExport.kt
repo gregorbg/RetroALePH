@@ -6,7 +6,6 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
@@ -28,17 +27,15 @@ data class FileMakerExport(
         }
     }
 
-    @ImplicitReflectionSerializer
+    @InternalSerializationApi
     inline fun <reified T : Any> typedRows(): List<T> {
         val mockSerial =
-            JSON.stringify(ListSerializer(MapSerializer(String.serializer(), String.serializer())), namedRows())
+            Json.encodeToString(ListSerializer(MapSerializer(String.serializer(), String.serializer())), namedRows())
 
-        return JSON.parse(ListSerializer(T::class.serializer()), mockSerial)
+        return Json.decodeFromString(ListSerializer(T::class.serializer()), mockSerial)
     }
 
     companion object {
         const val NAMESPACE = "http://www.filemaker.com/fmpxmlresult"
-
-        val JSON = Json(JsonConfiguration.Stable)
     }
 }
