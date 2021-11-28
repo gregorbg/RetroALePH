@@ -1,6 +1,6 @@
-package de.uzk.oas.japan.rdaconvert.model.filemaker
+package de.uzk.oas.japan.catalogue.model.filemaker
 
-import de.uzk.oas.japan.rdaconvert.model.FileMakerExport
+import de.uzk.oas.japan.catalogue.model.FileMakerExport
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement

@@ -1,10 +1,7 @@
-package de.uzk.oas.japan.rdaconvert.model
+package de.uzk.oas.japan.catalogue.model
 
-import de.uzk.oas.japan.rdaconvert.model.filemaker.*
+import de.uzk.oas.japan.catalogue.model.filemaker.*
 import kotlinx.serialization.*
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
@@ -27,12 +24,9 @@ data class FileMakerExport(
         }
     }
 
-    @InternalSerializationApi
     inline fun <reified T : Any> typedRows(): List<T> {
-        val mockSerial =
-            Json.encodeToString(ListSerializer(MapSerializer(String.serializer(), String.serializer())), namedRows())
-
-        return Json.decodeFromString(ListSerializer(T::class.serializer()), mockSerial)
+        val mockSerial = Json.encodeToString(namedRows())
+        return Json.decodeFromString(mockSerial)
     }
 
     companion object {

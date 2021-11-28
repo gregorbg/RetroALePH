@@ -1,4 +1,4 @@
-package de.uzk.oas.japan.rdaconvert.model.filemaker
+package de.uzk.oas.japan.catalogue.model.filemaker
 
 import kotlinx.serialization.Serializable
 
