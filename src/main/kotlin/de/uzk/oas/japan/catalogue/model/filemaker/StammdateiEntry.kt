@@ -1,7 +1,6 @@
 package de.uzk.oas.japan.catalogue.model.filemaker
 
 import de.uzk.oas.japan.library.BookSignature
-import de.uzk.oas.japan.library.LibrarySection
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -43,41 +42,5 @@ data class StammdateiEntry(
     @SerialName("Verlag") val verlag: String,
     @SerialName("VerlJap") val verlagJpn: String
 ) {
-    fun parseSignature(): BookSignature? {
-        if (this.signaturFlach.isBlank())
-            return null
-
-        if (this.signaturFlach.startsWith(LibrarySection.JADE.signatureTag, ignoreCase = true)) {
-            val indexSpec = this.signaturFlach.split("\\s".toRegex()).last()
-            val (index, subIndex) = parseIndexSpec(indexSpec)
-
-            return BookSignature.JaDe(index, subIndex)
-        }
-
-        val (signatureTag, categorySpec, authorTag, indexSpec) = this.signaturFlach.trim().split("\\s+".toRegex())
-
-        val section = LibrarySection.fromSignatureTag(signatureTag)
-
-        val (category, subCategory) = parseIndexSpec(categorySpec)
-        val (index, subIndex) = parseIndexSpec(indexSpec)
-
-        return BookSignature.Standard(section, category, subCategory, authorTag, index, subIndex)
-    }
-
-    companion object {
-        private fun parseIndexSpec(indexSpec: String): Pair<Int, Int?> {
-            // Hack for aggregated MtM entries
-            if ("-" in indexSpec) {
-                val (firstInRow, _) = indexSpec.split("-")
-                return parseIndexSpec(firstInRow)
-            }
-
-            if ("." in indexSpec) {
-                val (index, subIndex) = indexSpec.split(".").map { it.toInt() }
-                return index to subIndex
-            }
-
-            return indexSpec.toInt() to null
-        }
-    }
+    fun parseSignature() = BookSignature.parseOld(this.signaturFlach)
 }

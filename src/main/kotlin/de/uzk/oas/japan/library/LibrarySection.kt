@@ -8,6 +8,7 @@ enum class LibrarySection(val signatureTag: String) {
     HISTORY("Gs"),
     JAPANESE_MEDIA("JMT"),
     ARTS("K"),
+    CULTURE_THEORY("Kt"),
     LITERATURE("L"),
     LINGUISTICS("Ls"),
     MUSIC("Mk"),
@@ -20,7 +21,8 @@ enum class LibrarySection(val signatureTag: String) {
     RELIGION("Rg"),
     SPORTS("S"),
     ETHNOLOGY("V"),
-    ECONOMY("W");
+    ECONOMY("W"),
+    MAGAZINES("Z");
 
     companion object {
         fun fromSignatureTag(signatureTag: String): LibrarySection {
