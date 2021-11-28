@@ -1,6 +1,6 @@
-package de.uzk.oas.japan.catalogue.model
+package de.uzk.oas.japan.catalogue.model.filemaker
 
-import de.uzk.oas.japan.catalogue.model.filemaker.*
+import de.uzk.oas.japan.catalogue.model.filemaker.internal.*
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.serialization.XmlElement

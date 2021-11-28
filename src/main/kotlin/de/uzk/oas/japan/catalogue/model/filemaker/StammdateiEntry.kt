@@ -1,4 +1,4 @@
-package de.uzk.oas.japan.catalogue.model
+package de.uzk.oas.japan.catalogue.model.filemaker
 
 import de.uzk.oas.japan.library.BookSignature
 import de.uzk.oas.japan.library.LibrarySection
