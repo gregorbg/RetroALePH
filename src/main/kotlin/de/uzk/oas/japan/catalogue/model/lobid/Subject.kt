@@ -1,14 +1,16 @@
 package de.uzk.oas.japan.catalogue.model.lobid
 
+import de.uzk.oas.japan.catalogue.model.lobid.serial.ListWrappingSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Subject(
-    val id: String? = null,
-    @SerialName("type") val types: List<String> = emptyList(),
+    override val id: String? = null,
+    @SerialName("type") override val types: List<String> = listOf(),
+    @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
+    @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
     val componentList: List<Component> = emptyList(),
     val source: IdentifiableResource? = null,
-    @SerialName("label") val labels: OneOrMany<String> = OneOrMany.none(),
     val notation: String? = null
-)
+) : JsonLd.Typed()

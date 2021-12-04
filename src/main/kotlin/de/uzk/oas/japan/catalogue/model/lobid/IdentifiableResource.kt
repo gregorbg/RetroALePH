@@ -4,6 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class IdentifiableResource(
-    val id: String? = null,
+    override val id: String? = null,
     val label: String
-)
+) : JsonLd() {
+    override val labels: List<String>
+        get() = listOf(label)
+}

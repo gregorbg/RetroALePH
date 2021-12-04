@@ -1,5 +1,6 @@
 package de.uzk.oas.japan.catalogue.model.lobid
 
+import de.uzk.oas.japan.catalogue.model.lobid.serial.ListWrappingSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -7,6 +8,7 @@ import kotlinx.serialization.Serializable
 data class ExampleOfWork(
     val id: String? = null,
     @SerialName("type") val types: List<String>,
-    val creatorOfWork: String? = null,
-    @SerialName("label") val labels: OneOrMany<String>
+    @SerialName("label") @Serializable(with = ListWrappingSerializer::class) val labels: List<String> = emptyList(),
+    @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) val alternativeLabels: List<String> = emptyList(),
+    val creatorOfWork: String? = null
 )

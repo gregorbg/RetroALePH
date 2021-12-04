@@ -1,12 +1,13 @@
 package de.uzk.oas.japan.catalogue.model.lobid
 
+import de.uzk.oas.japan.catalogue.model.lobid.serial.ListWrappingSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Similar(
-    val id: String? = null,
+    override val id: String? = null,
+    @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
     @SerialName("note") val notes: List<String> = emptyList(),
-    @SerialName("label") val labels: OneOrMany<String> = OneOrMany.none(),
     val isbn: List<String> = emptyList()
-)
+) : JsonLd()

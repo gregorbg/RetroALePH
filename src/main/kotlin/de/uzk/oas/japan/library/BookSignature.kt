@@ -59,7 +59,7 @@ sealed class BookSignature {
                 return Magazine(index)
             }
 
-            val signatureMatch = "(\\w+?)(\\d+(?:-\\d+)?)(\\w+)(\\d+(?:-\\d+)?)".toRegex().matchEntire(rawSignature) ?: return null
+            val signatureMatch = "(\\w+?)(\\d(?:-\\d+)?)(\\w+)(\\d+(?:-\\d+)?)".toRegex().matchEntire(rawSignature) ?: return null
             val (signatureTag, categorySpec, authorTag, indexSpec) = signatureMatch.destructured
 
             val section = LibrarySection.fromSignatureTag(signatureTag)
