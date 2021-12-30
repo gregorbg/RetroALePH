@@ -6,10 +6,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Publication(
-    val id: String? = null,
-    @SerialName("type") val types: List<String>,
-    @SerialName("label") @Serializable(with = ListWrappingSerializer::class) val labels: List<String> = emptyList(),
-    @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) val alternativeLabels: List<String> = emptyList(),
+    override val id: String? = null,
+    @SerialName("type") override val types: List<String>,
+    @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
+    @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
     @SerialName("description") val descriptions: List<String> = emptyList(),
     val frequency: List<IdentifiableResource> = emptyList(),
     @SerialName("note") val notes: List<String> = emptyList(),
@@ -18,4 +18,4 @@ data class Publication(
     @Serializable(with = ListWrappingSerializer::class) val publishedBy: List<String> = emptyList(),
     val startDate: String? = null,
     val endDate: String? = null
-)
+) : JsonLd.WeakTyped()

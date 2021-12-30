@@ -12,4 +12,4 @@ data class NatureOfContent(
     @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
     val source: IdentifiableResource? = null,
     val gndIdentifier: String? = null
-) : JsonLd.Typed()
+) : JsonLd.WeakTyped()

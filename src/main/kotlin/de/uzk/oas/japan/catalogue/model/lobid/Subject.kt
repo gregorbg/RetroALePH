@@ -13,4 +13,4 @@ data class Subject(
     val componentList: List<Component> = emptyList(),
     val source: IdentifiableResource? = null,
     val notation: String? = null
-) : JsonLd.Typed()
+) : JsonLd.WeakTyped()

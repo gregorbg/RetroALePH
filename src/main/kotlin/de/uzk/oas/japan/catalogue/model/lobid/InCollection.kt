@@ -10,4 +10,4 @@ data class InCollection(
     @SerialName("type") override val types: List<String> = emptyList(),
     @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
     @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
-) : JsonLd.Typed()
+) : JsonLd.WeakTyped()
