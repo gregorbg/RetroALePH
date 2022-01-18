@@ -15,4 +15,16 @@ object StringUtils {
     val String.isJapanese get() = mojiDetector.hasKana(this) || mojiDetector.hasKanji(this)
 
     fun String.countOf(char: Char) = count { it == char }
+
+    fun String.cleanAccents(): String = this
+        .replace("Ā", "Â")
+        .replace("ā", "â")
+        .replace("Ē", "Ê")
+        .replace("ē", "ê")
+        .replace("Ī", "Î")
+        .replace("ī", "î")
+        .replace("Ō", "Ô")
+        .replace("ō", "ô")
+        .replace("Ū", "Û")
+        .replace("ū", "û")
 }

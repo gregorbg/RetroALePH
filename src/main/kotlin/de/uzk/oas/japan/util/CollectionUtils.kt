@@ -14,10 +14,12 @@ object CollectionUtils {
     }
 
     fun <K, V> Map<K, V>.reverseMap() = reverseMap { iterator { yield(it) } }
-    fun <K, V> Map<K, List<V>>.reverseMultiMap() = reverseMap { it.listIterator() }
+    fun <K, V> Map<K, Iterable<V>>.reverseMultiMap() = reverseMap { it.iterator() }
 
-    fun <K, V> Map<K, List<V>>.unfoldMultiMap() =
+    fun <K, V> Map<K, Iterable<V>>.unfoldMultiMap() =
         entries.flatMap { (key, value) -> value.map { key to it } }
 
     fun <A, B, C> Pair<A, Pair<B, C>>.unfoldPair() = Triple(first, second.first, second.second)
+
+    fun <T> T.repeatAsList(howManyTimes: Int) = List(howManyTimes) { this }
 }
