@@ -18,4 +18,5 @@ dependencies {
     implementation("org.marc4j:marc4j:2.9.2")
     implementation("io.ktor:ktor-client-java:1.6.7")
     implementation("org.apache.commons:commons-text:1.9")
+    implementation("com.andree-surya:moji4j:1.2.0")
 }
