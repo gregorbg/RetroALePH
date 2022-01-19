@@ -9,7 +9,7 @@ object StringUtils {
     fun String.enumConventionCamelCase(capitalizeFirstLetter: Boolean = false) =
         CaseUtils.toCamelCase(this, capitalizeFirstLetter, '_')
 
-    val <T : Enum<T>> T.nameCamelCase
+    val <T : Enum<T>> T.nameCamelCase: String
         get() = name.enumConventionCamelCase(true)
 
     val String.isJapanese get() = mojiDetector.hasKana(this) || mojiDetector.hasKanji(this)

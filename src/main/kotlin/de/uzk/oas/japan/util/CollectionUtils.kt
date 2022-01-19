@@ -21,5 +21,8 @@ object CollectionUtils {
 
     fun <A, B, C> Pair<A, Pair<B, C>>.unfoldPair() = Triple(first, second.first, second.second)
 
+    fun <K, V> Map<K, List<V>>.getOrEmpty(key: K) = get(key).orEmpty()
+    fun <K> Map<K, Int>.getOrZero(key: K) = get(key) ?: 0
+
     fun <T> T.repeatAsList(howManyTimes: Int) = List(howManyTimes) { this }
 }
