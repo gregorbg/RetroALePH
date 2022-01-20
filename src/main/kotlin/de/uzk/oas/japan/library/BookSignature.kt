@@ -3,7 +3,7 @@ package de.uzk.oas.japan.library
 sealed interface BookSignature {
     val section: LibrarySection
     val index: Int
-    val subIndex: Int?
+    val subIndices: List<Int>
 
     data class Standard(
         override val section: LibrarySection,
@@ -11,12 +11,12 @@ sealed interface BookSignature {
         val subCategories: List<Int> = emptyList(),
         val authorTag: String,
         override val index: Int,
-        override val subIndex: Int? = null
+        override val subIndices: List<Int> = emptyList()
     ) : BookSignature
 
     data class JaDe(
         override val index: Int,
-        override val subIndex: Int? = null
+        override val subIndices: List<Int> = emptyList()
     ) : BookSignature {
         override val section get() = LibrarySection.JADE
     }
@@ -25,14 +25,18 @@ sealed interface BookSignature {
         override val index: Int
     ) : BookSignature {
         override val section get() = LibrarySection.MAGAZINES
-        override val subIndex: Int? get() = null
+        override val subIndices get() = emptyList<Int>()
     }
 
     data class ReplicateItem(val signature: BookSignature, val number: Int) : BookSignature by signature
 
     companion object {
         const val HBZ_SEAL = "JAP/"
-        val HBZ_SIGNATURE_REGEX = "(\\w+?)(\\d(?:-\\d+)*)(\\w+)(\\d+(?:-\\d+)?)".toRegex()
+
+        // second group optional dash at the beginning (\d-??) is a HACK
+        // by consensus (which I voted against) we sign items with NO sub-category
+        // as JAP/Abc4-Author (formally wrong 4-) instead of JAP/Abc4Author
+        val OAS_SIGNATURE_REGEX = "([A-Za-z]+?)(\\d-??(?:-\\d+)*)([A-Za-z]+)(\\d+(?:-\\d+)*)".toRegex()
 
         fun parseNew(rawSignature: String): BookSignature? {
             if (rawSignature.isBlank())
@@ -58,7 +62,7 @@ sealed interface BookSignature {
                 val indexSpec = rawSignature.substring(LibrarySection.JADE.signatureTag.length)
                 val (index, subIndex) = parseIndexSpec(indexSpec, "-")
 
-                return JaDe(index, subIndex.singleOrNull())
+                return JaDe(index, subIndex)
             }
 
             if (rawSignature.startsWith(LibrarySection.MAGAZINES.signatureTag, ignoreCase = true)) {
@@ -67,7 +71,7 @@ sealed interface BookSignature {
                 return Magazine(index)
             }
 
-            val signatureMatch = HBZ_SIGNATURE_REGEX.matchEntire(rawSignature) ?: return null
+            val signatureMatch = OAS_SIGNATURE_REGEX.matchEntire(rawSignature) ?: return null
             val (signatureTag, categorySpec, authorTag, indexSpec) = signatureMatch.destructured
 
             val section = LibrarySection.fromSignatureTag(signatureTag)
@@ -75,7 +79,7 @@ sealed interface BookSignature {
             val (category, subCategories) = parseIndexSpec(categorySpec, "-")
             val (index, subIndex) = parseIndexSpec(indexSpec, "-")
 
-            return Standard(section, category, subCategories, authorTag, index, subIndex.singleOrNull())
+            return Standard(section, category, subCategories, authorTag, index, subIndex)
         }
 
         fun parseOld(rawSignature: String): BookSignature? {
@@ -86,7 +90,7 @@ sealed interface BookSignature {
                 val indexSpec = rawSignature.split("\\s".toRegex()).last()
                 val (index, subIndex) = parseIndexSpec(indexSpec, ".")
 
-                return JaDe(index, subIndex.singleOrNull())
+                return JaDe(index, subIndex)
             }
 
             val (signatureTag, categorySpec, authorTag, indexSpec) = rawSignature.trim().split("\\s+".toRegex())
@@ -96,7 +100,7 @@ sealed interface BookSignature {
             val (category, subCategory) = parseIndexSpec(categorySpec, ".")
             val (index, subIndex) = parseIndexSpec(indexSpec, ".")
 
-            return Standard(section, category, subCategory, authorTag, index, subIndex.singleOrNull())
+            return Standard(section, category, subCategory, authorTag, index, subIndex)
         }
 
         private fun parseIndexSpec(indexSpec: String, delimiter: String): Pair<Int, List<Int>> {
@@ -108,7 +112,9 @@ sealed interface BookSignature {
 
             if (delimiter in indexSpec) {
                 val (index, subValueGroup) = indexSpec.split(delimiter, limit = 2)
-                val subValues = subValueGroup.split(delimiter).map { it.toInt() }
+                val subValues = subValueGroup.split(delimiter)
+                    .filter { it.isNotEmpty() }
+                    .map { it.toInt() }
 
                 return index.toInt() to subValues
             }

@@ -24,5 +24,22 @@ object CollectionUtils {
     fun <K, V> Map<K, List<V>>.getOrEmpty(key: K) = get(key).orEmpty()
     fun <K> Map<K, Int>.getOrZero(key: K) = get(key) ?: 0
 
+    fun <K, V1, V2> Map<K, V1>.mapValuesNotNull(transform: (Map.Entry<K, V1>) -> V2?): Map<K, V2> {
+        return mapNotNull { entry ->
+            transform(entry)?.let { entry.key to it }
+        }.toMap()
+    }
+
+    fun <K, V> Map<K, V?>.filterValuesNotNull() = mapValuesNotNull { it.value }
+    inline fun <K, reified R> Map<K, *>.filterValuesIsInstance() = mapValuesNotNull { it.value as? R }
+
+    inline fun <K1, K2, V> Map<K1, V>.mapKeysNotNull(transform: (Map.Entry<K1, V>) -> K2?): Map<K2, V> {
+        return mapNotNull { entry ->
+            transform(entry)?.let { it to entry.value }
+        }.toMap()
+    }
+
+    inline fun <reified R, V> Map<*, V>.filterKeysIsInstance() = mapKeysNotNull { it.key as? R }
+
     fun <T> T.repeatAsList(howManyTimes: Int) = List(howManyTimes) { this }
 }
