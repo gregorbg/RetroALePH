@@ -966,7 +966,7 @@ enum class SignatureCategory(
 
     companion object {
         fun searchSignature(sig: BookSignature.Standard): SignatureCategory? {
-            val searchGroupIds = listOfNotNull(sig.category, sig.subCategory)
+            val searchGroupIds = listOf(sig.category) + sig.subCategories
             return searchTree(searchGroupIds, sig.section) as? SignatureCategory
         }
 

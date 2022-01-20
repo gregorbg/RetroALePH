@@ -12,7 +12,18 @@ data class JapDetailSubject(val keyword: String, val additions: Set<String> = em
             .toSet()
     }
 
+    fun filterReasonableComponentLiterals(): Set<String> {
+        val reasonableAdditions = additions.filter { it.isReasonableAddition() }
+        val completeValues = reasonableAdditions + keyword
+
+        return completeValues.map { it.cleanAccents() }
+            .filterNot { REGEX_AT_LEAST_THREE_DIGITS.containsMatchIn(it) }
+            .toSet()
+    }
+
     companion object {
+        val REGEX_AT_LEAST_THREE_DIGITS = "\\d{3,}".toRegex()
+
         fun String.isReasonableAddition(): Boolean = ',' !in this && '-' !in this && split(" ").size <= 3
 
         fun parse(raw: String): JapDetailSubject {

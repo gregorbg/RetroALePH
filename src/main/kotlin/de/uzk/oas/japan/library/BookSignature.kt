@@ -1,35 +1,38 @@
 package de.uzk.oas.japan.library
 
-sealed class BookSignature {
-    abstract val section: LibrarySection
-    abstract val index: Int
-    abstract val subIndex: Int?
+sealed interface BookSignature {
+    val section: LibrarySection
+    val index: Int
+    val subIndex: Int?
 
     data class Standard(
         override val section: LibrarySection,
         val category: Int,
-        val subCategory: Int? = null,
+        val subCategories: List<Int> = emptyList(),
         val authorTag: String,
         override val index: Int,
         override val subIndex: Int? = null
-    ) : BookSignature()
+    ) : BookSignature
 
     data class JaDe(
         override val index: Int,
         override val subIndex: Int? = null
-    ) : BookSignature() {
+    ) : BookSignature {
         override val section get() = LibrarySection.JADE
     }
 
     data class Magazine(
         override val index: Int
-    ) : BookSignature() {
+    ) : BookSignature {
         override val section get() = LibrarySection.MAGAZINES
         override val subIndex: Int? get() = null
     }
 
+    data class ReplicateItem(val signature: BookSignature, val number: Int) : BookSignature by signature
+
     companion object {
         const val HBZ_SEAL = "JAP/"
+        val HBZ_SIGNATURE_REGEX = "(\\w+?)(\\d(?:-\\d+)*)(\\w+)(\\d+(?:-\\d+)?)".toRegex()
 
         fun parseNew(rawSignature: String): BookSignature? {
             if (rawSignature.isBlank())
@@ -42,15 +45,20 @@ sealed class BookSignature {
             if (rawSignature.startsWith(HBZ_SEAL, ignoreCase = false))
                 return parseNew(rawSignature.substringAfter(HBZ_SEAL))
 
-            // TODO implement proper support for book copies (Zweitexemplare)
-            if (rawSignature.contains('#'))
-                return parseNew(rawSignature.substringBefore('#'))
+            if (rawSignature.contains('#')) {
+                val (fullSignatureSpec, replicationSpec) = rawSignature.split('#')
+
+                val originalSignature = parseNew(fullSignatureSpec) ?: return null
+                val itemCount = replicationSpec.lowercase().first() - 'a'
+
+                return ReplicateItem(originalSignature, itemCount)
+            }
 
             if (rawSignature.startsWith(LibrarySection.JADE.signatureTag, ignoreCase = true)) {
                 val indexSpec = rawSignature.substring(LibrarySection.JADE.signatureTag.length)
                 val (index, subIndex) = parseIndexSpec(indexSpec, "-")
 
-                return JaDe(index, subIndex)
+                return JaDe(index, subIndex.singleOrNull())
             }
 
             if (rawSignature.startsWith(LibrarySection.MAGAZINES.signatureTag, ignoreCase = true)) {
@@ -59,15 +67,15 @@ sealed class BookSignature {
                 return Magazine(index)
             }
 
-            val signatureMatch = "(\\w+?)(\\d(?:-\\d+)?)(\\w+)(\\d+(?:-\\d+)?)".toRegex().matchEntire(rawSignature) ?: return null
+            val signatureMatch = HBZ_SIGNATURE_REGEX.matchEntire(rawSignature) ?: return null
             val (signatureTag, categorySpec, authorTag, indexSpec) = signatureMatch.destructured
 
             val section = LibrarySection.fromSignatureTag(signatureTag)
 
-            val (category, subCategory) = parseIndexSpec(categorySpec, "-")
+            val (category, subCategories) = parseIndexSpec(categorySpec, "-")
             val (index, subIndex) = parseIndexSpec(indexSpec, "-")
 
-            return Standard(section, category, subCategory, authorTag, index, subIndex)
+            return Standard(section, category, subCategories, authorTag, index, subIndex.singleOrNull())
         }
 
         fun parseOld(rawSignature: String): BookSignature? {
@@ -78,7 +86,7 @@ sealed class BookSignature {
                 val indexSpec = rawSignature.split("\\s".toRegex()).last()
                 val (index, subIndex) = parseIndexSpec(indexSpec, ".")
 
-                return JaDe(index, subIndex)
+                return JaDe(index, subIndex.singleOrNull())
             }
 
             val (signatureTag, categorySpec, authorTag, indexSpec) = rawSignature.trim().split("\\s+".toRegex())
@@ -88,10 +96,10 @@ sealed class BookSignature {
             val (category, subCategory) = parseIndexSpec(categorySpec, ".")
             val (index, subIndex) = parseIndexSpec(indexSpec, ".")
 
-            return Standard(section, category, subCategory, authorTag, index, subIndex)
+            return Standard(section, category, subCategory, authorTag, index, subIndex.singleOrNull())
         }
 
-        private fun parseIndexSpec(indexSpec: String, delimiter: String): Pair<Int, Int?> {
+        private fun parseIndexSpec(indexSpec: String, delimiter: String): Pair<Int, List<Int>> {
             // Hack for aggregated MtM entries in old SD signatures
             if (delimiter == "." && "-" in indexSpec) {
                 val (firstInRow, _) = indexSpec.split("-")
@@ -99,11 +107,13 @@ sealed class BookSignature {
             }
 
             if (delimiter in indexSpec) {
-                val (index, subIndex) = indexSpec.split(delimiter).map { it.toInt() }
-                return index to subIndex
+                val (index, subValueGroup) = indexSpec.split(delimiter, limit = 2)
+                val subValues = subValueGroup.split(delimiter).map { it.toInt() }
+
+                return index.toInt() to subValues
             }
 
-            return indexSpec.toInt() to null
+            return indexSpec.toInt() to emptyList()
         }
     }
 }
