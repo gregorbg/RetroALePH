@@ -1,6 +1,8 @@
 package de.uzk.oas.japan.library
 
-enum class LibrarySection(val signatureTag: String) {
+import de.uzk.oas.japan.library.model.HierarchicalCategory
+
+enum class LibrarySection(val signatureTag: String, override vararg val keywordLiterals: String) : HierarchicalCategory {
     JADE("JaDe"),
     GENERAL("A"),
     ENCYCLOPEDIC("E"),
@@ -23,6 +25,9 @@ enum class LibrarySection(val signatureTag: String) {
     ETHNOLOGY("V"),
     ECONOMY("W"),
     MAGAZINES("Z");
+
+    override val parent: HierarchicalCategory? = null
+    override val signatureIdPart by ::signatureTag
 
     companion object {
         fun fromSignatureTag(signatureTag: String): LibrarySection {
