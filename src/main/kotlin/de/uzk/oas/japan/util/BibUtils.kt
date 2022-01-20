@@ -68,9 +68,7 @@ object BibUtils {
     }
 
     fun parseCachedJapBestand(cacheFolder: File = FOLDER_TMP): List<BibliographicResource> {
-        val bestand = loadCachedJapBestand(cacheFolder)
-
-        return bestand.map { Json.decodeFromString<JsonLd>(it) }
-            .filterIsInstance<BibliographicResource>()
+        return loadCachedJapBestand(cacheFolder)
+            .map { Json.decodeFromString(it) }
     }
 }
