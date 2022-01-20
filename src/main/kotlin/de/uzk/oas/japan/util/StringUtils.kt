@@ -27,4 +27,11 @@ object StringUtils {
         .replace("ō", "ô")
         .replace("Ū", "Û")
         .replace("ū", "û")
+
+    fun String.containsAllInOrder(symbols: String, ignoreCase: Boolean = false): Boolean {
+        return symbols.zipWithNext()
+            .all { (a, b) ->
+                indexOf(a, ignoreCase = ignoreCase) < lastIndexOf(b, ignoreCase = ignoreCase)
+            }
+    }
 }

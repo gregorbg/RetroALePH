@@ -5,11 +5,13 @@ sealed interface BookSignature {
     val index: Int
     val subIndices: List<Int>
 
+    fun unwrap(): BookSignature = this
+
     data class Standard(
         override val section: LibrarySection,
         val category: Int,
         val subCategories: List<Int> = emptyList(),
-        val authorTag: String,
+        val descriptionTag: String,
         override val index: Int,
         override val subIndices: List<Int> = emptyList()
     ) : BookSignature
@@ -28,10 +30,16 @@ sealed interface BookSignature {
         override val subIndices get() = emptyList<Int>()
     }
 
-    data class ReplicateItem(val signature: BookSignature, val number: Int) : BookSignature by signature
+    data class ReplicateItem(
+        val signature: BookSignature,
+        val number: Int
+    ) : BookSignature by signature {
+        override fun unwrap() = signature.unwrap()
+    }
 
     companion object {
-        const val HBZ_SEAL = "JAP/"
+        const val HBZ_OAS_SEAL = "JAP/"
+        const val REPLICATE_ITEM_INDICATOR = '#'
 
         // second group optional dash at the beginning (\d-??) is a HACK
         // by consensus (which I voted against) we sign items with NO sub-category
@@ -46,14 +54,14 @@ sealed interface BookSignature {
             if (rawSignature.matches("^0+.*".toRegex()))
                 return null
 
-            if (rawSignature.startsWith(HBZ_SEAL, ignoreCase = false))
-                return parseNew(rawSignature.substringAfter(HBZ_SEAL))
+            if (rawSignature.startsWith(HBZ_OAS_SEAL, ignoreCase = false))
+                return parseNew(rawSignature.substringAfter(HBZ_OAS_SEAL))
 
-            if (rawSignature.contains('#')) {
-                val (fullSignatureSpec, replicationSpec) = rawSignature.split('#')
+            if (rawSignature.contains(REPLICATE_ITEM_INDICATOR)) {
+                val (fullSignatureSpec, replicationSpec) = rawSignature.split(REPLICATE_ITEM_INDICATOR)
 
                 val originalSignature = parseNew(fullSignatureSpec) ?: return null
-                val itemCount = replicationSpec.lowercase().first() - 'a'
+                val itemCount = replicationSpec.lowercase().first() - 'a' // replications are "counted" alphabetically
 
                 return ReplicateItem(originalSignature, itemCount)
             }
@@ -78,6 +86,10 @@ sealed interface BookSignature {
 
             val (category, subCategories) = parseIndexSpec(categorySpec, "-")
             val (index, subIndex) = parseIndexSpec(indexSpec, "-")
+
+            // The hack with ending category indices on a dash is only valid for JMT
+            if (categorySpec.endsWith("-") && subCategories.isEmpty() && section != LibrarySection.JAPANESE_MEDIA)
+                return null
 
             return Standard(section, category, subCategories, authorTag, index, subIndex)
         }
