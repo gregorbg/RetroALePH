@@ -23,5 +23,6 @@ enum class BibliographicType {
     REPORT,
     SCHOOLBOOK,
     SERIES,
-    THESIS
+    THESIS,
+    GAME
 }

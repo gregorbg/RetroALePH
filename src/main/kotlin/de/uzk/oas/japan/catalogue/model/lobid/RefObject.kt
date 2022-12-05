@@ -11,4 +11,6 @@ data class RefObject(
     @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
     @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
     val inDataset: IdentifiableResource,
+    val dateCreated: String? = null, // TODO require between here and DescribedBy
+    val dateModified: String? = null
 ) : JsonLd.WeakTyped()

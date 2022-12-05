@@ -21,6 +21,7 @@ data class BibliographicResource(
     @SerialName("subjectAltLabel") @Serializable(with = ListWrappingSerializer::class) val subjectAlternativeLabels: List<String> = emptyList(),
     val title: String,
     val hbzId: String,
+    val almaMmsId: String? = null, // TODO enforce
     val isPartOf: List<IsPartOf> = emptyList(),
     val oclcNumber: List<String> = emptyList(),
     val otherTitleInformation: List<String> = emptyList(),
