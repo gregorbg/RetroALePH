@@ -3,8 +3,9 @@ package de.uzk.oas.japan.util
 import de.uzk.oas.japan.catalogue.model.HbzId
 import de.uzk.oas.japan.catalogue.model.lobid.BibliographicResource
 import de.uzk.oas.japan.catalogue.model.lobid.HasItem
-import de.uzk.oas.japan.catalogue.model.lobid.JsonLd
 import de.uzk.oas.japan.catalogue.model.lobid.Subject
+import de.uzk.oas.japan.catalogue.model.raw.mab.AlephMab2
+import de.uzk.oas.japan.catalogue.model.raw.marc.AlmaMarc21
 import de.uzk.oas.japan.library.BookSignature
 import de.uzk.oas.japan.library.LibrarySection
 import de.uzk.oas.japan.util.StringUtils.containsAllInOrder
@@ -15,13 +16,14 @@ import io.ktor.client.statement.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import nl.adaptivity.xmlutil.serialization.XML
 import org.apache.commons.lang3.StringUtils
 import java.io.File
 import java.util.zip.GZIPInputStream
 
 object BibUtils {
     const val URL_FREIE_VERSCHLAGWORTUNG = "http://www.wikidata.org/entity/Q47524318"
-    const val IDENTIFIER_OAS_LIBRARY = "DE-38-459#"
+    const val IDENTIFIER_OAS_LIBRARY = "DE-38-459"
 
     val HBZ_HT_PATTERN = "HT\\d{9}".toRegex()
 
@@ -32,8 +34,11 @@ object BibUtils {
     val Subject.isFreieVerschlagwortung: Boolean
         get() = source?.id == URL_FREIE_VERSCHLAGWORTUNG
 
+    fun List<HasItem>.findHeldByLibrary(libraryId: String) =
+        find { "$libraryId#" in it.heldBy?.id.orEmpty() }
+
     fun List<HasItem>.findOASLibrary() =
-        find { IDENTIFIER_OAS_LIBRARY in it.heldBy?.id.orEmpty() }
+        findHeldByLibrary(IDENTIFIER_OAS_LIBRARY)
 
     fun BibliographicResource.findOASSignature() =
         hasItem.findOASLibrary()?.callNumber
@@ -103,10 +108,10 @@ object BibUtils {
     }
 
     fun <T> generateSignatureDistribution(
-        signatures: Map<T, BookSignature?>,
+        signatures: Map<T, BookSignature>,
         kindMapping: (T) -> String
-    ): Map<LibrarySection?, Map<String, Int>> {
-        return signatures.entries.groupBy { it.value?.section }
+    ): Map<LibrarySection, Map<String, Int>> {
+        return signatures.entries.groupBy { it.value.section }
             .mapValues { it.value.groupBy { td -> kindMapping(td.key) }.mapValues { td -> td.value.size } }
         //.mapKeys { it.key?.signatureTag }
     }
@@ -119,7 +124,7 @@ object BibUtils {
 
             runBlocking {
                 val gzipResponse = KTOR_CLIENT.use {
-                    it.get<HttpResponse>("https://lobid.org/resources/search?owner=DE-38-459&format=jsonl") {
+                    it.get("https://lobid.org/resources/search?owner=$IDENTIFIER_OAS_LIBRARY&format=jsonl") {
                         header("Accept-Encoding", "gzip")
                     }
                 }
@@ -139,5 +144,45 @@ object BibUtils {
     fun parseCachedJapBestand(cacheFolder: File = FOLDER_TMP): List<BibliographicResource> {
         return loadCachedJapBestand(cacheFolder)
             .map { Json.decodeFromString(it) }
+    }
+
+    fun loadAlephMab(book: BibliographicResource): AlephMab2 {
+        val url = "https://lobid.org/hbz01/${book.hbzId}"
+
+        val mabRaw = runBlocking {
+            KTOR_CLIENT.use {
+                it.get(url).bodyAsText()
+            }
+        }
+
+        return XML.decodeFromString(mabRaw)
+    }
+
+    fun loadAlmaMarc(book: BibliographicResource): AlmaMarc21? {
+        val almaMms = book.almaMmsId ?: return null
+        val url = "https://alma.lobid.org/marcxml/$almaMms"
+
+        val marcRaw = runBlocking {
+            KTOR_CLIENT.use {
+                it.get(url).bodyAsText()
+            }
+        }
+
+        return XML.decodeFromString(marcRaw)
+    }
+
+    fun loadAlmaResource(book: BibliographicResource): BibliographicResource {
+        if (book.almaMmsId != null)
+            return book
+
+        val url = "https://test.lobid.org/resources/${book.hbzId}.json"
+
+        val jsonRaw = runBlocking {
+            KTOR_CLIENT.use {
+                it.get(url).bodyAsText()
+            }
+        }
+
+        return Json.decodeFromString(jsonRaw)
     }
 }
