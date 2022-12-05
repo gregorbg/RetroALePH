@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.6.10"
-    kotlin("plugin.serialization") version "1.6.10"
+    kotlin("jvm") version "1.7.20"
+    kotlin("plugin.serialization") version "1.7.20"
 }
 
 group = "de.uzk.oas.japan"
@@ -13,11 +13,11 @@ repositories {
 dependencies {
     implementation(kotlin("reflect"))
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
-    implementation("io.github.pdvrieze.xmlutil:serialization-jvm:0.84.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    implementation("io.github.pdvrieze.xmlutil:serialization-jvm:0.84.3")
     implementation("org.marc4j:marc4j:2.9.2")
-    implementation("io.ktor:ktor-client-java:1.6.7")
-    implementation("org.apache.commons:commons-text:1.9")
+    implementation("io.ktor:ktor-client-java:2.1.2")
+    implementation("org.apache.commons:commons-text:1.10.0")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("com.andree-surya:moji4j:1.2.0")
 }
