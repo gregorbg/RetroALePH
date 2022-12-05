@@ -16,8 +16,9 @@ data class FileMakerExport(
     val resultSet: ExportResultSet
 ) {
     fun namedRows(): List<Map<String, String>> {
+        val keys = metadata.fields.map(MetadataField::name)
+
         return resultSet.rows.map {
-            val keys = metadata.fields.map(MetadataField::name)
             val values = it.columns.map(ExportResultColumn::data)
 
             keys.zip(values).toMap()
