@@ -1,5 +1,6 @@
 package de.uzk.oas.japan.catalogue.model.raw.mab
 
+import de.uzk.oas.japan.catalogue.model.raw.SubField
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import nl.adaptivity.xmlutil.serialization.XmlValue
@@ -7,6 +8,6 @@ import nl.adaptivity.xmlutil.serialization.XmlValue
 @Serializable
 @XmlSerialName("subfield", MabBibRecord.DDB_NAMESPACE, "")
 data class MabSubField(
-    val code: String,
-    @XmlValue(true) val content: String
-)
+    override val code: String,
+    @XmlValue(true) override val content: String
+) : SubField
