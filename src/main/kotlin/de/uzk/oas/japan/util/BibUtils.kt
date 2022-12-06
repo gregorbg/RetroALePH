@@ -4,6 +4,9 @@ import de.uzk.oas.japan.catalogue.model.HbzId
 import de.uzk.oas.japan.catalogue.model.lobid.BibliographicResource
 import de.uzk.oas.japan.catalogue.model.lobid.HasItem
 import de.uzk.oas.japan.catalogue.model.lobid.Subject
+import de.uzk.oas.japan.catalogue.model.raw.BibRecord
+import de.uzk.oas.japan.catalogue.model.raw.DataField
+import de.uzk.oas.japan.catalogue.model.raw.SubField
 import de.uzk.oas.japan.catalogue.model.raw.mab.AlephMab2
 import de.uzk.oas.japan.catalogue.model.raw.marc.AlmaMarc21
 import de.uzk.oas.japan.library.BookSignature
@@ -26,10 +29,11 @@ object BibUtils {
     const val IDENTIFIER_OAS_LIBRARY = "DE-38-459"
 
     val HBZ_HT_PATTERN = "HT\\d{9}".toRegex()
+    val HBZ_MMS_PATTERN = "\\d{18}".toRegex()
 
     val FOLDER_TMP = File("/tmp")
 
-    val KTOR_CLIENT = HttpClient(Java)
+    val KTOR_CLIENT get() = HttpClient(Java)
 
     val Subject.isFreieVerschlagwortung: Boolean
         get() = source?.id == URL_FREIE_VERSCHLAGWORTUNG
@@ -158,8 +162,10 @@ object BibUtils {
         return XML.decodeFromString(mabRaw)
     }
 
-    fun loadAlmaMarc(book: BibliographicResource): AlmaMarc21? {
-        val almaMms = book.almaMmsId ?: return null
+    fun loadAlmaMarc(book: BibliographicResource): AlmaMarc21 {
+        val almaMms = book.almaMmsId
+            ?: loadAlmaResource(book).almaMmsId
+
         val url = "https://alma.lobid.org/marcxml/$almaMms"
 
         val marcRaw = runBlocking {
@@ -184,5 +190,65 @@ object BibUtils {
         }
 
         return Json.decodeFromString(jsonRaw)
+    }
+
+    fun findTransliterations(
+        book: BibliographicResource,
+        field: (BibliographicResource) -> String
+    ): Map<String, String> {
+        val almaRaw = loadAlmaMarc(book)
+        val fieldValue = field(book)
+
+        return buildMap {
+            for (dataField in almaRaw.dataFields) {
+                for (subField in dataField.subFields) {
+                    // TODO currently, we guess mappings based on raw string value.
+                    //  This might lead to multiple matches that currently override one another
+                    if (subField.content == fieldValue) {
+                        val (langTag, transliteration) = findSubFieldTransliteration(almaRaw, dataField, subField)
+
+                        if (langTag == null) {
+                            continue
+                        }
+
+                        put(langTag, transliteration)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun findSubFieldTransliteration(
+        almaRaw: BibRecord,
+        dataField: DataField,
+        subField: SubField
+    ): Pair<String?, String> {
+        // subfield 6 holds bindings to parallel field counts
+        val targetCodeField = dataField.subFields.find { it.code == "6" }
+        // if not found, return "null language" as a signal to skip this transliteration
+            ?: return null to "no-target-code"
+
+        val (_, linkCounter) = targetCodeField.content.split("-", limit = 2)
+        val targetCode = "${dataField.tag}-$linkCounter"
+
+        val eightEighties = almaRaw.dataFields.filter {
+            // only consider 880 fields that match indicators in the first place
+            val isTransliteration = it.tag == "880" && it.indicatorOne == dataField.indicatorOne && it.indicatorTwo == dataField.indicatorTwo
+            val hasMatchingCode = it.subFields.find { sf -> sf.code == "6" }?.content?.startsWith(targetCode) ?: false
+
+            isTransliteration && hasMatchingCode
+        }
+
+        val matchingEightEighty = eightEighties.firstOrNull {
+            it.subFields.any { sf -> sf.code == subField.code }
+        } ?: return null to "no-matching-subfield"
+
+        val languageCodeField = matchingEightEighty.subFields.first { it.code == "6" }
+        val (_, languageCode) = languageCodeField.content.split("/", limit = 2)
+
+        val contentField = matchingEightEighty.subFields.first { it.code == subField.code }
+        val transliteratedContent = contentField.content
+
+        return languageCode to transliteratedContent
     }
 }
