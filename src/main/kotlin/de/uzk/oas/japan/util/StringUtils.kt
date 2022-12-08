@@ -6,17 +6,18 @@ import org.apache.commons.text.CaseUtils
 object StringUtils {
     private val mojiDetector = MojiDetector()
 
-    fun String.enumConventionCamelCase(capitalizeFirstLetter: Boolean = false) =
+    fun String.enumConventionCamelCase(capitalizeFirstLetter: Boolean = false): String =
         CaseUtils.toCamelCase(this, capitalizeFirstLetter, '_')
 
     val <T : Enum<T>> T.nameCamelCase: String
         get() = name.enumConventionCamelCase(true)
 
-    val String.isJapanese get() = mojiDetector.hasKana(this) || mojiDetector.hasKanji(this)
+    val String.containsJapanese: Boolean
+        get() = mojiDetector.hasKana(this) || mojiDetector.hasKanji(this)
 
     fun String.countOf(char: Char) = count { it == char }
 
-    fun String.cleanAccents(): String = this
+    fun String.macronToCircumflex(): String = this
         .replace("Ā", "Â")
         .replace("ā", "â")
         .replace("Ē", "Ê")

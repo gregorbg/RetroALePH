@@ -1,28 +1,17 @@
 package de.uzk.oas.japan.util
 
-import de.uzk.oas.japan.catalogue.model.HbzId
-import de.uzk.oas.japan.catalogue.model.lobid.BibliographicResource
-import de.uzk.oas.japan.catalogue.model.lobid.HasItem
-import de.uzk.oas.japan.catalogue.model.lobid.Subject
-import de.uzk.oas.japan.catalogue.model.raw.BibRecord
-import de.uzk.oas.japan.catalogue.model.raw.DataField
-import de.uzk.oas.japan.catalogue.model.raw.SubField
-import de.uzk.oas.japan.catalogue.model.raw.mab.AlephMab2
-import de.uzk.oas.japan.catalogue.model.raw.marc.AlmaMarc21
-import de.uzk.oas.japan.library.BookSignature
-import de.uzk.oas.japan.library.LibrarySection
+import de.uzk.oas.japan.catalogue.HbzId
+import de.uzk.oas.japan.catalogue.lobid.BibliographicResource
+import de.uzk.oas.japan.catalogue.lobid.HasItem
+import de.uzk.oas.japan.catalogue.lobid.Subject
+import de.uzk.oas.japan.catalogue.raw.BibRecord
+import de.uzk.oas.japan.catalogue.raw.DataField
+import de.uzk.oas.japan.catalogue.raw.SubField
+import de.uzk.oas.japan.library.signature.BookSignature
+import de.uzk.oas.japan.library.signature.data.LibrarySection
 import de.uzk.oas.japan.util.StringUtils.containsAllInOrder
-import io.ktor.client.*
-import io.ktor.client.engine.java.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import nl.adaptivity.xmlutil.serialization.XML
 import org.apache.commons.lang3.StringUtils
 import java.io.File
-import java.util.zip.GZIPInputStream
 
 object BibUtils {
     const val URL_FREIE_VERSCHLAGWORTUNG = "http://www.wikidata.org/entity/Q47524318"
@@ -32,8 +21,6 @@ object BibUtils {
     val HBZ_MMS_PATTERN = "\\d{18}".toRegex()
 
     val FOLDER_TMP = File("/tmp")
-
-    val KTOR_CLIENT get() = HttpClient(Java)
 
     val Subject.isFreieVerschlagwortung: Boolean
         get() = source?.id == URL_FREIE_VERSCHLAGWORTUNG
@@ -47,7 +34,7 @@ object BibUtils {
     fun BibliographicResource.findOASSignature() =
         hasItem.findOASLibrary()?.callNumber
 
-    fun BibliographicResource.isValidSignatureTag(
+    fun BibliographicResource.isValidContentTag(
         signatureTag: String,
         superordinateMap: Map<HbzId, BibliographicResource> = emptyMap()
     ): Boolean {
@@ -102,7 +89,7 @@ object BibUtils {
 
                     val superordinateBibResource = superordinateMap[htNumber] ?: continue
 
-                    if (superordinateBibResource.isValidSignatureTag(signatureTag, superordinateMap))
+                    if (superordinateBibResource.isValidContentTag(signatureTag, superordinateMap))
                         return true
                 }
             }
@@ -120,85 +107,10 @@ object BibUtils {
         //.mapKeys { it.key?.signatureTag }
     }
 
-    fun loadCachedJapBestand(cacheFolder: File = FOLDER_TMP): List<String> {
-        val japBestandFile = File(cacheFolder, "japbestand.hbz")
-
-        if (!japBestandFile.exists()) {
-            println("Querying LOBID API!")
-
-            runBlocking {
-                val gzipResponse = KTOR_CLIENT.use {
-                    it.get("https://lobid.org/resources/search?owner=$IDENTIFIER_OAS_LIBRARY&format=jsonl") {
-                        header("Accept-Encoding", "gzip")
-                    }
-                }
-
-                japBestandFile.writeBytes(gzipResponse.readBytes())
-            }
-        }
-
-        val gzipInput = GZIPInputStream(japBestandFile.inputStream())
-
-        val stringBytes = gzipInput.use { it.readBytes() }
-        val jsonLines = stringBytes.decodeToString()
-
-        return jsonLines.lines().filter { it.isNotBlank() }
-    }
-
-    fun parseCachedJapBestand(cacheFolder: File = FOLDER_TMP): List<BibliographicResource> {
-        return loadCachedJapBestand(cacheFolder)
-            .map { Json.decodeFromString(it) }
-    }
-
-    fun loadAlephMab(book: BibliographicResource): AlephMab2 {
-        val url = "https://lobid.org/hbz01/${book.hbzId}"
-
-        val mabRaw = runBlocking {
-            KTOR_CLIENT.use {
-                it.get(url).bodyAsText()
-            }
-        }
-
-        return XML.decodeFromString(mabRaw)
-    }
-
-    fun loadAlmaMarc(book: BibliographicResource): AlmaMarc21 {
-        val almaMms = book.almaMmsId
-            ?: loadAlmaResource(book).almaMmsId
-
-        val url = "https://alma.lobid.org/marcxml/$almaMms"
-
-        val marcRaw = runBlocking {
-            KTOR_CLIENT.use {
-                it.get(url).bodyAsText()
-            }
-        }
-
-        return XML.decodeFromString(marcRaw)
-    }
-
-    fun loadAlmaResource(book: BibliographicResource): BibliographicResource {
-        if (book.almaMmsId != null)
-            return book
-
-        val url = "https://test.lobid.org/resources/${book.hbzId}.json"
-
-        val jsonRaw = runBlocking {
-            KTOR_CLIENT.use {
-                it.get(url).bodyAsText()
-            }
-        }
-
-        return Json.decodeFromString(jsonRaw)
-    }
-
     fun findTransliterations(
-        book: BibliographicResource,
-        field: (BibliographicResource) -> String
+        almaRaw: BibRecord,
+        fieldValue: String
     ): Map<String, String> {
-        val almaRaw = loadAlmaMarc(book)
-        val fieldValue = field(book)
-
         return buildMap {
             for (dataField in almaRaw.dataFields) {
                 for (subField in dataField.subFields) {
