@@ -24,5 +24,7 @@ enum class BibliographicType {
     SCHOOLBOOK,
     SERIES,
     THESIS,
-    GAME
+    GAME,
+    // TODO bug?
+    SONSTIGES,
 }
