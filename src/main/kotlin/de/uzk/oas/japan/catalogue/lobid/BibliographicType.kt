@@ -4,12 +4,18 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class BibliographicType {
+    ARCHIVED_WEB_PAGE,
     ARTICLE,
     BIBLIOGRAPHY,
     BIOGRAPHY,
     BOOK,
+    COLLECTION,
+    EDITED_VOLUME,
     FESTSCHRIFT,
+    GAME,
     IMAGE,
+    JOURNAL,
+    LEGISLATION,
     MAP,
     MISCELLANEOUS,
     MULTI_VOLUME_BOOK,
@@ -23,8 +29,9 @@ enum class BibliographicType {
     REPORT,
     SCHOOLBOOK,
     SERIES,
+    STANDARD,
+    STATISTICS,
     THESIS,
-    GAME,
     // TODO bug?
     SONSTIGES,
 }
