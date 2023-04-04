@@ -18,10 +18,10 @@ import nl.adaptivity.xmlutil.serialization.XML
 class LobidApi(val storage: BibDataStorage) : BibDataSource {
     private val KTOR_CLIENT get() = HttpClient(Java)
 
-    fun loadJapBestand(): List<BibliographicResource> {
-        return storage.cachedBestand ?: runBlocking {
+    fun loadBestand(institutionId: String): List<BibliographicResource> {
+        return storage.retrieveCachedBestand(institutionId) ?: runBlocking {
             val gzipBytes = KTOR_CLIENT.use {
-                it.get("https://lobid.org/resources/search?owner=${BibUtils.IDENTIFIER_OAS_LIBRARY}&format=jsonl") {
+                it.get("https://lobid.org/resources/search?owner=${institutionId}&format=jsonl") {
                     header("Accept-Encoding", "gzip")
                 }.readBytes()
             }
@@ -30,7 +30,7 @@ class LobidApi(val storage: BibDataStorage) : BibDataSource {
                 .lines().filter { it.isNotBlank() }
 
             jsonLines.map { Json.decodeFromString<BibliographicResource>(it) }
-                .also(storage::cacheBestand)
+                .also { storage.cacheBestand(institutionId, it) }
         }
     }
 

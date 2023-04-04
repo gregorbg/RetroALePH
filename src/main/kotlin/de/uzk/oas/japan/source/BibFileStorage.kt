@@ -16,20 +16,22 @@ class BibFileStorage(val rootFolder: File) : BibDataStorage {
         rootFolder.mkdirs()
     }
 
-    private val bestandFile: File
-        get() = File(rootFolder, FILENAME_BESTAND)
+    private fun bestandFileFor(institutionId: String) =
+        File(this.rootFolder, "${institutionId}.bestand.hbz")
 
-    override val cachedBestand: List<BibliographicResource>?
-        get() = bestandFile.takeIf { it.exists() }
+    override fun retrieveCachedBestand(institutionId: String): List<BibliographicResource>? {
+        return bestandFileFor(institutionId).takeIf { it.exists() }
             ?.readBytes()
             ?.let { FileUtils.decodeGzipString(it) }
             ?.lines()
             ?.map { Json.decodeFromString(it) }
+    }
 
-    override fun cacheBestand(lobidBestand: List<BibliographicResource>) {
+    override fun cacheBestand(institutionId: String, lobidBestand: List<BibliographicResource>) {
         val jsonLines = lobidBestand.joinToString("\n") { Json.encodeToString(it) }
         val gzipBytes = FileUtils.encodeGzip(jsonLines)
 
+        val bestandFile = bestandFileFor(institutionId)
         bestandFile.writeBytes(gzipBytes)
     }
 
@@ -57,7 +59,8 @@ class BibFileStorage(val rootFolder: File) : BibDataStorage {
 
     override fun loadAlephMab(book: BibliographicResource): AlephMab2? = loadInternal(book, FOLDER_MAB2, XML)
     override fun loadAlmaMarc(book: BibliographicResource): AlmaMarc21? = loadInternal(book, FOLDER_MARC21, XML)
-    override fun upcycleToAlmaResource(book: BibliographicResource): BibliographicResource? = loadInternal(book, FOLDER_ALMA_UPCYCLE, Json)
+    override fun upcycleToAlmaResource(book: BibliographicResource): BibliographicResource? =
+        loadInternal(book, FOLDER_ALMA_UPCYCLE, Json)
 
     private inline fun <reified T> loadInternal(
         book: BibliographicResource,
@@ -75,8 +78,6 @@ class BibFileStorage(val rootFolder: File) : BibDataStorage {
     }
 
     companion object {
-        const val FILENAME_BESTAND = "japbestand.hbz"
-
         const val FOLDER_MAB2 = "mab2"
         const val FOLDER_MARC21 = "marc21"
         const val FOLDER_ALMA_UPCYCLE = "alma-upcycle"

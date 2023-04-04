@@ -15,7 +15,9 @@ import java.io.File
 
 object BibUtils {
     const val URL_FREIE_VERSCHLAGWORTUNG = "http://www.wikidata.org/entity/Q47524318"
+
     const val IDENTIFIER_OAS_LIBRARY = "DE-38-459"
+    const val IDENTIFIER_MATHEDU_LIBRARY = "DE-38-315"
 
     val HBZ_HT_PATTERN = "HT\\d{9}".toRegex()
     val HBZ_MMS_PATTERN = "\\d{18}".toRegex()
