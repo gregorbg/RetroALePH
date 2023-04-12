@@ -6,17 +6,13 @@ import java.util.zip.GZIPOutputStream
 
 object FileUtils {
     fun decodeGzipString(gzip: ByteArray): String {
-        val gzipInput = GZIPInputStream(gzip.inputStream())
-        val stringBytes = gzipInput.use { it.readBytes() }
-
-        return stringBytes.decodeToString()
+        return GZIPInputStream(gzip.inputStream()).bufferedReader().use { it.readText() }
     }
 
     fun encodeGzip(content: String): ByteArray {
         val outputBaos = ByteArrayOutputStream()
 
-        val gzipOutput = GZIPOutputStream(outputBaos)
-        gzipOutput.use { it.write(content.encodeToByteArray()) }
+        GZIPOutputStream(outputBaos).bufferedWriter().use { it.write(content) }
 
         return outputBaos.toByteArray()
     }
