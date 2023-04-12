@@ -63,4 +63,6 @@ data class BibliographicResource(
     val dateOfDeath: String? = null, // FIXME GB wrong! report on GitHub!
     val ismn: List<String> = emptyList(),
     val webPageArchived: List<IdentifiableResource> = emptyList(),
+    val seeAlso: List<IdentifiableResource> = emptyList(),
+    @SerialName("license") @Serializable(with = ListWrappingSerializer::class) val licenses: List<IdentifiableResource> = emptyList(),
 ) : JsonLd.StrongTyped<BibliographicType>()
