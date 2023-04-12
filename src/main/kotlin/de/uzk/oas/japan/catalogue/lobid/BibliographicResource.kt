@@ -21,14 +21,15 @@ data class BibliographicResource(
     @SerialName("medium") val media: List<IdentifiableResource>,
     @SerialName("subject") val subjects: List<Subject> = emptyList(),
     val title: String,
-    val hbzId: HbzId,
+    val hbzId: HbzId? = null,
     val almaMmsId: AlmaMmsId,
     val deprecatedUri: String? = null, // TODO get rid after Alma migration
     val isPartOf: List<IsPartOf> = emptyList(),
     val oclcNumber: List<String> = emptyList(),
     val otherTitleInformation: List<String> = emptyList(),
     val publication: List<Publication>,
-    val sameAs: List<IdentifiableResource>,
+    val sameAs: List<IdentifiableResource> = emptyList(),
+    val containedIn: List<IdentifiableResource> = emptyList(),
     val describedBy: DescribedBy,
     val tableOfContents: List<IdentifiableResource> = emptyList(),
     val natureOfContent: List<NatureOfContent> = emptyList(),
@@ -60,5 +61,6 @@ data class BibliographicResource(
     val thesisInformation: List<String> = emptyList(),
     val dateOfBirth: String? = null, // FIXME GB wrong! report on GitHub!
     val dateOfDeath: String? = null, // FIXME GB wrong! report on GitHub!
-    val ismn: List<String> = emptyList()
+    val ismn: List<String> = emptyList(),
+    val webPageArchived: List<IdentifiableResource> = emptyList(),
 ) : JsonLd.StrongTyped<BibliographicType>()

@@ -18,5 +18,6 @@ data class Agent(
     @SerialName("alternativeTitle") val alternativeTitles: List<String> = emptyList(),
     val subject: List<Subject> = emptyList(),
     val isbn: List<String> = emptyList(),
-    val gndIdentifier: String? = null
+    val gndIdentifier: String? = null,
+    val sameAs: List<String> = emptyList(),
 ) : JsonLd.WeakTyped()
