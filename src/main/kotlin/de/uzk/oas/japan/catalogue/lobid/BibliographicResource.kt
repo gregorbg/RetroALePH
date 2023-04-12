@@ -1,5 +1,7 @@
 package de.uzk.oas.japan.catalogue.lobid
 
+import de.uzk.oas.japan.catalogue.AlmaMmsId
+import de.uzk.oas.japan.catalogue.HbzId
 import de.uzk.oas.japan.catalogue.lobid.serial.BibliographicTypeListFilterSerializer
 import de.uzk.oas.japan.catalogue.lobid.serial.ListWrappingSerializer
 import kotlinx.serialization.SerialName
@@ -18,10 +20,9 @@ data class BibliographicResource(
     @SerialName("language") val languages: List<IdentifiableResource> = emptyList(),
     @SerialName("medium") val media: List<IdentifiableResource>,
     @SerialName("subject") val subjects: List<Subject> = emptyList(),
-    @SerialName("subjectAltLabel") @Serializable(with = ListWrappingSerializer::class) val subjectAlternativeLabels: List<String> = emptyList(),
     val title: String,
-    val hbzId: String,
-    val almaMmsId: String? = null, // TODO enforce
+    val hbzId: HbzId,
+    val almaMmsId: AlmaMmsId,
     val deprecatedUri: String? = null, // TODO get rid after Alma migration
     val isPartOf: List<IsPartOf> = emptyList(),
     val oclcNumber: List<String> = emptyList(),
@@ -44,11 +45,9 @@ data class BibliographicResource(
     val bibliographicCitation: String? = null,
     @SerialName("titleKeyword") val titleKeywords: List<String> = emptyList(),
     @SerialName("description") val descriptions: List<IdentifiableResource> = emptyList(),
-    val similar: List<Similar> = emptyList(),
     @SerialName("abstract") val abstracts: List<String> = emptyList(),
     @SerialName("supplement") val supplements: List<IdentifiableResource> = emptyList(),
     @SerialName("shortTitle") val shortTitles: List<String> = emptyList(),
-    val hasVersion: List<IdentifiableResource> = emptyList(),
     val primaryForm: List<IdentifiableResource> = emptyList(),
     val fulltextOnline: List<IdentifiableResource> = emptyList(),
     val urn: List<String> = emptyList(),
@@ -58,7 +57,6 @@ data class BibliographicResource(
     val spatial: List<Spatial> = emptyList(),
     val issn: List<String> = emptyList(),
     val zdbId: String? = null,
-    val titleOfSubSeries: String? = null,
     val thesisInformation: List<String> = emptyList(),
     val dateOfBirth: String? = null, // FIXME GB wrong! report on GitHub!
     val dateOfDeath: String? = null, // FIXME GB wrong! report on GitHub!

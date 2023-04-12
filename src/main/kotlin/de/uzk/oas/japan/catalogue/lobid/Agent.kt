@@ -10,7 +10,6 @@ data class Agent(
     @SerialName("type") override val types: List<String>,
     @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
     @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
-    val source: IdentifiableResource? = null,
     val otherTitleInformation: List<String> = emptyList(),
     val dateOfBirth: String? = null,
     val dateOfDeath: String? = null,

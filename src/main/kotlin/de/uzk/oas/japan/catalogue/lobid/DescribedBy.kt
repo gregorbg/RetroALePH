@@ -10,7 +10,7 @@ data class DescribedBy(
     @SerialName("type") override val types: List<String>,
     @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
     @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
-    val modifiedBy: IdentifiableResource? = null,
+    @Serializable(with = ListWrappingSerializer::class) val modifiedBy: List<IdentifiableResource> = emptyList(),
     val dateCreated: String? = null, // FIXME require between here and RefObject
     val dateModified: String? = null,
     val inDataset: IdentifiableResource,

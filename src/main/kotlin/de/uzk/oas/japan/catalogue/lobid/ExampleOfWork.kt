@@ -10,5 +10,4 @@ data class ExampleOfWork(
     @SerialName("type") override val types: List<String>,
     @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
     @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
-    val creatorOfWork: String? = null
 ) : JsonLd.WeakTyped()
