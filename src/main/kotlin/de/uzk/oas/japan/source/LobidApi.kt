@@ -14,6 +14,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.decodeFromString
@@ -24,8 +25,8 @@ import kotlin.io.use
 class LobidApi(val storage: BibDataStorage) : BibDataSource {
     override fun loadBestand(institutionId: String): List<BibliographicResource> {
         return storage.loadBestand(institutionId) ?: runBlocking {
-            val gzipBytes = KTOR_CLIENT.use {
-                it.get {
+            KTOR_CLIENT.use { ktor ->
+                val gzipBytes = ktor.get {
                     url {
                         protocol = URLProtocol.HTTPS
                         host = BASE_HOST
@@ -37,14 +38,12 @@ class LobidApi(val storage: BibDataStorage) : BibDataSource {
                     }
 
                     header("Accept-Encoding", "gzip")
-                }.readBytes()
+                }.bodyAsChannel()
+
+                FileUtils.decodeGzipStream(gzipBytes.toInputStream()).useLines { lines ->
+                    lines.map { Json.decodeFromString<BibliographicResource>(it) }.toList()
+                }.also { storage.storeBestand(institutionId, it) }
             }
-
-            val jsonLines = FileUtils.decodeGzipString(gzipBytes)
-                .lines().filter { it.isNotBlank() }
-
-            jsonLines.map { Json.decodeFromString<BibliographicResource>(it) }
-                .also { storage.storeBestand(institutionId, it) }
         }
     }
 
