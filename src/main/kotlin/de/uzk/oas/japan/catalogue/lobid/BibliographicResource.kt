@@ -13,7 +13,7 @@ data class BibliographicResource(
     @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
     @SerialName("contribution") val contributions: List<Contribution> = emptyList(),
     @Serializable(with = ListWrappingSerializer::class) val extent: List<String> = emptyList(),
-    val hasItem: List<HasItem>,
+    val hasItem: List<HasItem> = emptyList(), // TODO remove default value after Alma migration (only here because Aleph bibs still report no ITM in Alma test env)
     @SerialName("responsibilityStatement") val responsibilityStatements: List<String> = emptyList(),
     @SerialName("language") val languages: List<IdentifiableResource> = emptyList(),
     @SerialName("medium") val media: List<IdentifiableResource>,
@@ -22,6 +22,7 @@ data class BibliographicResource(
     val title: String,
     val hbzId: String,
     val almaMmsId: String? = null, // TODO enforce
+    val deprecatedUri: String? = null, // TODO get rid after Alma migration
     val isPartOf: List<IsPartOf> = emptyList(),
     val oclcNumber: List<String> = emptyList(),
     val otherTitleInformation: List<String> = emptyList(),

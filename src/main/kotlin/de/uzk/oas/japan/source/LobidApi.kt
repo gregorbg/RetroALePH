@@ -1,14 +1,18 @@
 package de.uzk.oas.japan.source
 
+import de.uzk.oas.japan.catalogue.HbzId
 import de.uzk.oas.japan.catalogue.lobid.BibliographicResource
 import de.uzk.oas.japan.catalogue.raw.mab.AlephMab2
 import de.uzk.oas.japan.catalogue.raw.marc.AlmaMarc21
-import de.uzk.oas.japan.util.BibUtils
 import de.uzk.oas.japan.util.FileUtils
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.java.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.decodeFromString
@@ -16,7 +20,13 @@ import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.serialization.XML
 
 class LobidApi(val storage: BibDataStorage) : BibDataSource {
-    private val KTOR_CLIENT get() = HttpClient(Java)
+    private val KTOR_CLIENT get() = HttpClient(Java) {
+        expectSuccess = true
+
+        install(ContentNegotiation) {
+            json()
+        }
+    }
 
     fun loadBestand(institutionId: String): List<BibliographicResource> {
         return storage.retrieveCachedBestand(institutionId) ?: runBlocking {
@@ -31,6 +41,20 @@ class LobidApi(val storage: BibDataStorage) : BibDataSource {
 
             jsonLines.map { Json.decodeFromString<BibliographicResource>(it) }
                 .also { storage.cacheBestand(institutionId, it) }
+        }
+    }
+
+    fun retrieve(hbzId: HbzId): BibliographicResource? {
+        return try {
+            runBlocking {
+                KTOR_CLIENT.use {
+                    it.get("https://lobid.org/resources/${hbzId.id}") {
+                        header("Accept", "application/json")
+                    }.body<BibliographicResource>()
+                }
+            }
+        } catch (e: ClientRequestException) {
+            return null
         }
     }
 
