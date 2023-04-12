@@ -22,19 +22,23 @@ class BibFileStorage(val rootFolder: File) : BibDataStorage {
         File(this.rootFolder, "${institutionId}.bestand.hbz")
 
     override fun loadBestand(institutionId: String): List<BibliographicResource>? {
-        return bestandFileFor(institutionId).takeIf { it.exists() }
-            ?.readBytes()
-            ?.let { FileUtils.decodeGzipString(it) }
-            ?.lines()
-            ?.map { Json.decodeFromString(it) }
+        val bestandFile = bestandFileFor(institutionId)
+
+        if (!bestandFile.exists()) {
+            return null
+        }
+
+        return FileUtils.decodeGzipStream(bestandFile.inputStream()).useLines { lines ->
+            lines.map { Json.decodeFromString<BibliographicResource>(it) }.toList()
+        }
     }
 
     override fun storeBestand(institutionId: String, lobidBestand: List<BibliographicResource>) {
-        val jsonLines = lobidBestand.joinToString("\n") { Json.encodeToString(it) }
-        val gzipBytes = FileUtils.encodeGzip(jsonLines)
-
         val bestandFile = bestandFileFor(institutionId)
-        bestandFile.writeBytes(gzipBytes)
+
+        FileUtils.encodeGzipStream(bestandFile.outputStream()).use { writer ->
+            lobidBestand.forEach { writer.appendLine(Json.encodeToString(it)) }
+        }
     }
 
     override fun storeAlmaMarc(bookId: AlmaMmsId, marc: AlmaMarc21) =
@@ -53,7 +57,7 @@ class BibFileStorage(val rootFolder: File) : BibDataStorage {
         val cacheFile = File(cacheFolder, bookId.id)
 
         val dataSerial = encoder.encodeToString(data)
-        cacheFile.writeText(dataSerial)
+        FileUtils.encodeGzipStream(cacheFile.outputStream()).use { it.appendLine(dataSerial) }
     }
 
     override fun loadResource(hbzId: HbzId): BibliographicResource? = loadInternal(hbzId, FOLDER_RESOURCES, Json)
