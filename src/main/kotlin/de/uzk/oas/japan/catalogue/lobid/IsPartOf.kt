@@ -10,6 +10,6 @@ data class IsPartOf(
     @SerialName("type") override val types: List<String>,
     @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
     @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
-    val hasSuperordinate: List<IdentifiableResource>,
+    val hasSuperordinate: List<IdentifiableResource> = emptyList(),
     val numbering: String? = null
 ) : JsonLd.WeakTyped()

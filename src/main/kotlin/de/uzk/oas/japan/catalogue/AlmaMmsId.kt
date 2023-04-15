@@ -4,4 +4,4 @@ import kotlinx.serialization.Serializable
 
 @JvmInline
 @Serializable
-value class HbzId(override val id: String) : IdProvider
+value class AlmaMmsId(override val id: String) : IdProvider

@@ -1,23 +1,18 @@
 package de.uzk.oas.japan.util
 
-import java.io.ByteArrayOutputStream
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
 object FileUtils {
-    fun decodeGzipString(gzip: ByteArray): String {
-        val gzipInput = GZIPInputStream(gzip.inputStream())
-        val stringBytes = gzipInput.use { it.readBytes() }
-
-        return stringBytes.decodeToString()
+    fun decodeGzipStream(gzip: InputStream): BufferedReader {
+        return GZIPInputStream(gzip).bufferedReader()
     }
 
-    fun encodeGzip(content: String): ByteArray {
-        val outputBaos = ByteArrayOutputStream()
-
-        val gzipOutput = GZIPOutputStream(outputBaos)
-        gzipOutput.use { it.write(content.encodeToByteArray()) }
-
-        return outputBaos.toByteArray()
+    fun encodeGzipStream(target: OutputStream): BufferedWriter {
+        return GZIPOutputStream(target).bufferedWriter()
     }
 }

@@ -12,5 +12,5 @@ data class Spatial(
     @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
     val source: IdentifiableResource,
     val notation: String? = null,
-    val focus: Focus
+    val focus: Focus? = null,
 ) : JsonLd.WeakTyped()

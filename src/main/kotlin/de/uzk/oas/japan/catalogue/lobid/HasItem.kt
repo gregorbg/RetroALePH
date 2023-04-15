@@ -14,5 +14,7 @@ data class HasItem(
     @SerialName("note") val notes: List<String> = emptyList(),
     val callNumber: String? = null,
     val serialNumber: String? = null,
-    val currentLocation: String? = null
+    val currentLocation: String? = null,
+    val electronicLocator: String? = null,
+    @SerialName("sublocation") val subLocation: String? = null,
 ) : JsonLd.WeakTyped()

@@ -10,7 +10,9 @@ data class Subject(
     @SerialName("type") override val types: List<String> = listOf(),
     @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
     @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
+    val gndIdentifier: String? = null,
     val componentList: List<Component> = emptyList(),
     val source: IdentifiableResource? = null,
-    val notation: String? = null
+    val notation: String? = null,
+    val version: String? = null,
 ) : JsonLd.WeakTyped()

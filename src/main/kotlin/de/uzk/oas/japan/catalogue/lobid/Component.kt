@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Component(
     override val id: String? = null,
-    @SerialName("type") override val types: List<String>,
+    @SerialName("type") override val types: List<String> = emptyList(), // TODO Is this a bug?
     @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
     @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
     val source: IdentifiableResource? = null,

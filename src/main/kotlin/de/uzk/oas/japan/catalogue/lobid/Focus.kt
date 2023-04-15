@@ -10,5 +10,5 @@ data class Focus(
     @SerialName("type") override val types: List<String>,
     @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
     @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
-    @SerialName("geo") val geography: Geography
+    val geo: Geography? = null,
 ) : JsonLd.WeakTyped()

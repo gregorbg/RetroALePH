@@ -10,7 +10,6 @@ data class Agent(
     @SerialName("type") override val types: List<String>,
     @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
     @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
-    val source: IdentifiableResource? = null,
     val otherTitleInformation: List<String> = emptyList(),
     val dateOfBirth: String? = null,
     val dateOfDeath: String? = null,
@@ -19,5 +18,6 @@ data class Agent(
     @SerialName("alternativeTitle") val alternativeTitles: List<String> = emptyList(),
     val subject: List<Subject> = emptyList(),
     val isbn: List<String> = emptyList(),
-    val gndIdentifier: String? = null
+    val gndIdentifier: String? = null,
+    val sameAs: List<String> = emptyList(),
 ) : JsonLd.WeakTyped()
