@@ -1,6 +1,5 @@
-package de.uzk.oas.japan.catalogue
+package de.uzk.oas.japan.library.subject
 
-import de.uzk.oas.japan.library.subject.JapDetailSubject
 import kotlinx.serialization.Serializable
 
 @JvmInline

@@ -3,7 +3,7 @@ package de.uzk.oas.japan.source
 import de.uzk.oas.japan.catalogue.AlmaMmsId
 import de.uzk.oas.japan.catalogue.HbzId
 import de.uzk.oas.japan.catalogue.IdProvider
-import de.uzk.oas.japan.catalogue.lobid.BibliographicResource
+import de.uzk.oas.japan.catalogue.lobid.BibResource
 import de.uzk.oas.japan.catalogue.raw.marc.AlmaMarc21
 import de.uzk.oas.japan.util.FileUtils
 import io.ktor.client.*
@@ -23,7 +23,7 @@ import nl.adaptivity.xmlutil.serialization.XML
 import kotlin.io.use
 
 class LobidApi(val storage: BibDataStorage) : BibDataSource {
-    override fun loadBestand(institutionId: String): List<BibliographicResource> {
+    override fun loadBestand(institutionId: String): List<BibResource> {
         return storage.loadBestand(institutionId) ?: runBlocking {
             KTOR_CLIENT.use { ktor ->
                 val gzipBytes = ktor.get {
@@ -41,15 +41,15 @@ class LobidApi(val storage: BibDataStorage) : BibDataSource {
                 }.bodyAsChannel()
 
                 FileUtils.decodeGzipStream(gzipBytes.toInputStream()).useLines { lines ->
-                    lines.map { Json.decodeFromString<BibliographicResource>(it) }.toList()
+                    lines.map { Json.decodeFromString<BibResource>(it) }.toList()
                 }.also { storage.storeBestand(institutionId, it) }
             }
         }
     }
 
-    override fun loadResource(hbzId: HbzId): BibliographicResource? {
+    override fun loadResource(hbzId: HbzId): BibResource? {
         return storage.loadResource(hbzId)
-            ?: fetchAndStore<BibliographicResource>("resources", hbzId, Json) { storage.storeResource(hbzId, it) }
+            ?: fetchAndStore<BibResource>("resources", hbzId, Json) { storage.storeResource(hbzId, it) }
     }
 
     override fun loadAlmaMarc(almaMmsId: AlmaMmsId): AlmaMarc21? {
@@ -86,7 +86,7 @@ class LobidApi(val storage: BibDataStorage) : BibDataSource {
 
     companion object {
         // TODO Alma revert URL
-        const val BASE_HOST = "alma.lobid.org"
+        const val BASE_HOST = "lobid.org"
 
         private val KTOR_CLIENT
             get() = HttpClient(Java) {

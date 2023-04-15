@@ -1,7 +1,7 @@
 package de.uzk.oas.japan.util
 
 import de.uzk.oas.japan.catalogue.HbzId
-import de.uzk.oas.japan.catalogue.lobid.BibliographicResource
+import de.uzk.oas.japan.catalogue.lobid.BibResource
 import de.uzk.oas.japan.catalogue.lobid.HasItem
 import de.uzk.oas.japan.catalogue.lobid.Subject
 import de.uzk.oas.japan.catalogue.raw.BibRecord
@@ -33,16 +33,16 @@ object BibUtils {
     fun List<HasItem>.findOASLibrary() =
         findHeldByLibrary(IDENTIFIER_OAS_LIBRARY)
 
-    fun BibliographicResource.findOASSignature() =
+    fun BibResource.findOASSignature() =
         hasItem.findOASLibrary()?.callNumber
 
-    fun BibliographicResource.isValidContentTag(
+    fun BibResource.isValidContentTag(
         signatureTag: String,
-        superordinateMap: Map<HbzId, BibliographicResource> = emptyMap()
+        superordinateMap: Map<HbzId, BibResource> = emptyMap()
     ): Boolean {
         for (contributor in contributions) {
             val agent = contributor.agent
-            val allNames = agent.labels + agent.alternativeLabels
+            val allNames = listOf(agent.label) + agent.alternativeLabels
 
             if ("CorporateBody" in agent.types) {
                 for (corporateName in allNames) {

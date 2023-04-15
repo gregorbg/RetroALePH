@@ -2,26 +2,24 @@ package de.uzk.oas.japan.catalogue.lobid
 
 import de.uzk.oas.japan.catalogue.AlmaMmsId
 import de.uzk.oas.japan.catalogue.HbzId
-import de.uzk.oas.japan.catalogue.lobid.serial.BibliographicTypeListFilterSerializer
+import de.uzk.oas.japan.catalogue.lobid.serial.ResourceTypeCamelCaseSerializer
 import de.uzk.oas.japan.catalogue.lobid.serial.ListWrappingSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class BibliographicResource(
-    override val id: String? = null,
-    @SerialName("type") @Serializable(with = BibliographicTypeListFilterSerializer::class) override val types: List<BibliographicType>,
-    @SerialName("label") @Serializable(with = ListWrappingSerializer::class) override val labels: List<String> = emptyList(),
-    @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) override val alternativeLabels: List<String> = emptyList(),
+data class BibResource(
+    val id: String,
+    @SerialName("type") val types: List<@Serializable(with = ResourceTypeCamelCaseSerializer::class) ResourceType>,
     @SerialName("contribution") val contributions: List<Contribution> = emptyList(),
     @Serializable(with = ListWrappingSerializer::class) val extent: List<String> = emptyList(),
-    val hasItem: List<HasItem> = emptyList(), // TODO remove default value after Alma migration (only here because Aleph bibs still report no ITM in Alma test env)
+    val hasItem: List<HasItem> = emptyList(),
     @SerialName("responsibilityStatement") val responsibilityStatements: List<String> = emptyList(),
     @SerialName("language") val languages: List<IdentifiableResource> = emptyList(),
     @SerialName("medium") val media: List<IdentifiableResource>,
     @SerialName("subject") val subjects: List<Subject> = emptyList(),
     val title: String,
-    val hbzId: HbzId? = null,
+    val hbzId: HbzId? = null, // TODO is this supposed to be nullable?
     val almaMmsId: AlmaMmsId,
     val deprecatedUri: String? = null, // TODO get rid after Alma migration
     val isPartOf: List<IsPartOf> = emptyList(),
@@ -65,4 +63,4 @@ data class BibliographicResource(
     val webPageArchived: List<IdentifiableResource> = emptyList(),
     val seeAlso: List<IdentifiableResource> = emptyList(),
     @SerialName("license") @Serializable(with = ListWrappingSerializer::class) val licenses: List<IdentifiableResource> = emptyList(),
-) : JsonLd.StrongTyped<BibliographicType>()
+)

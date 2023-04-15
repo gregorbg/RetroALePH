@@ -5,9 +5,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class InCollection(
+data class IntlLabelResource(
     val id: String,
-    @SerialName("type") val types: List<String>,
-    val label: String,
-    @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) val alternativeLabels: List<String> = emptyList(),
+    @SerialName("type") @Serializable(with = ListWrappingSerializer::class) val types: List<String> = emptyList(),
+    val intlLabels: Map<String, String> = emptyMap(),
 )

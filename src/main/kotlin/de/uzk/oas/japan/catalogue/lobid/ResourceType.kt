@@ -3,10 +3,11 @@ package de.uzk.oas.japan.catalogue.lobid
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class BibliographicType {
+enum class ResourceType {
     ARCHIVED_WEB_PAGE,
     ARTICLE,
     BIBLIOGRAPHY,
+    BIBLIOGRAPHIC_RESOURCE,
     BIOGRAPHY,
     BOOK,
     COLLECTION,

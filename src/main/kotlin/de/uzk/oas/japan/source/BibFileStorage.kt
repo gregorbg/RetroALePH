@@ -3,7 +3,7 @@ package de.uzk.oas.japan.source
 import de.uzk.oas.japan.catalogue.AlmaMmsId
 import de.uzk.oas.japan.catalogue.HbzId
 import de.uzk.oas.japan.catalogue.IdProvider
-import de.uzk.oas.japan.catalogue.lobid.BibliographicResource
+import de.uzk.oas.japan.catalogue.lobid.BibResource
 import de.uzk.oas.japan.catalogue.raw.marc.AlmaMarc21
 import de.uzk.oas.japan.util.FileUtils
 import kotlinx.serialization.StringFormat
@@ -21,7 +21,7 @@ class BibFileStorage(val rootFolder: File) : BibDataStorage {
     private fun bestandFileFor(institutionId: String) =
         File(this.rootFolder, "${institutionId}.bestand.hbz")
 
-    override fun loadBestand(institutionId: String): List<BibliographicResource>? {
+    override fun loadBestand(institutionId: String): List<BibResource>? {
         val bestandFile = bestandFileFor(institutionId)
 
         if (!bestandFile.exists()) {
@@ -29,11 +29,11 @@ class BibFileStorage(val rootFolder: File) : BibDataStorage {
         }
 
         return FileUtils.decodeGzipStream(bestandFile.inputStream()).useLines { lines ->
-            lines.map { Json.decodeFromString<BibliographicResource>(it) }.toList()
+            lines.map { Json.decodeFromString<BibResource>(it) }.toList()
         }
     }
 
-    override fun storeBestand(institutionId: String, lobidBestand: List<BibliographicResource>) {
+    override fun storeBestand(institutionId: String, lobidBestand: List<BibResource>) {
         val bestandFile = bestandFileFor(institutionId)
 
         FileUtils.encodeGzipStream(bestandFile.outputStream()).use { writer ->
@@ -44,7 +44,7 @@ class BibFileStorage(val rootFolder: File) : BibDataStorage {
     override fun storeAlmaMarc(bookId: AlmaMmsId, marc: AlmaMarc21) =
         cacheInternal(bookId, FOLDER_MARC21, XML, marc)
 
-    override fun storeResource(bookId: HbzId, book: BibliographicResource) =
+    override fun storeResource(bookId: HbzId, book: BibResource) =
         cacheInternal(bookId, FOLDER_RESOURCES, Json, book)
 
     private inline fun <reified T> cacheInternal(
@@ -60,7 +60,7 @@ class BibFileStorage(val rootFolder: File) : BibDataStorage {
         FileUtils.encodeGzipStream(cacheFile.outputStream()).use { it.appendLine(dataSerial) }
     }
 
-    override fun loadResource(hbzId: HbzId): BibliographicResource? = loadInternal(hbzId, FOLDER_RESOURCES, Json)
+    override fun loadResource(hbzId: HbzId): BibResource? = loadInternal(hbzId, FOLDER_RESOURCES, Json)
 
     override fun loadAlmaMarc(almaMmsId: AlmaMmsId): AlmaMarc21? = loadInternal(almaMmsId, FOLDER_MARC21, XML)
 
