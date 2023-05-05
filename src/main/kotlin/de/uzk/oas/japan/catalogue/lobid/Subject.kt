@@ -6,9 +6,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Subject(
+    val id: String? = null,
     @SerialName("type") val types: List<String> = listOf(),
-    @SerialName("label") @Serializable(with = ListWrappingSerializer::class) val labels: List<String> = emptyList(),
-    @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) val alternativeLabels: List<String> = emptyList(),
+    val label: String? = null,
     val gndIdentifier: String? = null,
     val componentList: List<Component> = emptyList(),
     val source: IdentifiableResource? = null,

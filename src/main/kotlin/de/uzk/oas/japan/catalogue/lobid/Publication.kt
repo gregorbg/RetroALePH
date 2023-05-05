@@ -5,10 +5,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Publication( // TODO einige default values besser weg?
+data class Publication(
     @SerialName("type") val types: List<String>,
-    val label: String,
-    @SerialName("altLabel") @Serializable(with = ListWrappingSerializer::class) val alternativeLabels: List<String> = emptyList(),
     @SerialName("description") val descriptions: List<String> = emptyList(),
     val frequency: List<IdentifiableResource> = emptyList(),
     @SerialName("note") val notes: List<String> = emptyList(),

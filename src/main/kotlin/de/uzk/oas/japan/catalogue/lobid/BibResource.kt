@@ -17,20 +17,23 @@ data class BibResource(
     @SerialName("responsibilityStatement") val responsibilityStatements: List<String> = emptyList(),
     @SerialName("language") val languages: List<IdentifiableResource> = emptyList(),
     @SerialName("medium") val media: List<IdentifiableResource>,
+    val bibliographicLevel: IdentifiableResource,
     @SerialName("subject") val subjects: List<Subject> = emptyList(),
     val title: String,
-    val hbzId: HbzId? = null, // TODO is this supposed to be nullable?
+    val hbzId: HbzId? = null, // nullable because ZDB entries don't have HBZ IDs any more
     val almaMmsId: AlmaMmsId,
-    val deprecatedUri: String? = null, // TODO get rid after Alma migration
+    val deprecatedUri: String? = null,
     val isPartOf: List<IsPartOf> = emptyList(),
     val oclcNumber: List<String> = emptyList(),
     val otherTitleInformation: List<String> = emptyList(),
-    val publication: List<Publication>,
+    val publication: List<Publication> = emptyList(),
     val sameAs: List<IdentifiableResource> = emptyList(),
+    val similar: List<Similar> = emptyList(),
     val containedIn: List<IdentifiableResource> = emptyList(),
     val describedBy: DescribedBy,
     val tableOfContents: List<IdentifiableResource> = emptyList(),
     val natureOfContent: List<NatureOfContent> = emptyList(),
+    @SerialName("subjectAltLabel") val subjectAlternativeLabels: List<String> = emptyList(),
     val edition: List<String> = emptyList(),
     val exampleOfWork: ExampleOfWork? = null,
     val containsExampleOfWork: List<ExampleOfWork> = emptyList(),
@@ -57,10 +60,9 @@ data class BibResource(
     val issn: List<String> = emptyList(),
     val zdbId: String? = null,
     val thesisInformation: List<String> = emptyList(),
-    val dateOfBirth: String? = null, // FIXME GB wrong! report on GitHub!
-    val dateOfDeath: String? = null, // FIXME GB wrong! report on GitHub!
     val ismn: List<String> = emptyList(),
     val webPageArchived: List<IdentifiableResource> = emptyList(),
     val seeAlso: List<IdentifiableResource> = emptyList(),
     @SerialName("license") @Serializable(with = ListWrappingSerializer::class) val licenses: List<IdentifiableResource> = emptyList(),
+    @SerialName("subjectslabels") val subjectsLabels: List<String> = emptyList() // TODO melden und rauskriegen was das ist
 )

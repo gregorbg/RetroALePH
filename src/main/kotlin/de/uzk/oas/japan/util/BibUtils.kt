@@ -42,7 +42,7 @@ object BibUtils {
     ): Boolean {
         for (contributor in contributions) {
             val agent = contributor.agent
-            val allNames = listOf(agent.label) + agent.alternativeLabels
+            val allNames = listOfNotNull(agent.label) + agent.alternativeLabels
 
             if ("CorporateBody" in agent.types) {
                 for (corporateName in allNames) {

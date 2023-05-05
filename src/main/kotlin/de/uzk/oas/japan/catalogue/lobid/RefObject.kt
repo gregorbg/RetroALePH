@@ -8,8 +8,10 @@ data class RefObject(
     val id: String,
     @SerialName("type") val types: List<String>,
     val label: String,
-    @SerialName("altLabel") val alternativeLabels: List<String> = emptyList(),
     val inDataset: IdentifiableResource,
+    val sourceOrganization: IdentifiableResource? = null,
+    val provider: IdentifiableResource? = null,
+    val modifiedBy: List<IdentifiableResource> = emptyList(),
     val dateCreated: String? = null,
     val dateModified: String? = null
 )

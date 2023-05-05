@@ -86,7 +86,7 @@ class LobidApi(val storage: BibDataStorage) : BibDataSource {
 
     companion object {
         // TODO Alma revert URL
-        const val BASE_HOST = "lobid.org"
+        const val BASE_HOST = "alma.lobid.org"
 
         private val KTOR_CLIENT
             get() = HttpClient(Java) {

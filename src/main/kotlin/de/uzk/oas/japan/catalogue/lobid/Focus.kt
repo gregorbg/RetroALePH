@@ -8,6 +8,5 @@ data class Focus(
     val id: String,
     @SerialName("type") val types: List<String>,
     val label: String,
-    @SerialName("altLabel") val alternativeLabels: List<String> = emptyList(),
     val geo: Geography? = null,
 )

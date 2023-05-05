@@ -4,7 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class IdentifiableResource(
-    val id: String,
-    //@SerialName("label") @Serializable(with = ListWrappingSerializer::class) val labels: List<String> = emptyList(),
+    val id: String? = null,
     val label: String,
 )
