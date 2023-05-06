@@ -1,7 +1,6 @@
 package de.uzk.oas.japan.source
 
 import de.uzk.oas.japan.catalogue.AlmaMmsId
-import de.uzk.oas.japan.catalogue.HbzId
 import de.uzk.oas.japan.catalogue.IdProvider
 import de.uzk.oas.japan.catalogue.IsilSeal
 import de.uzk.oas.japan.catalogue.lobid.BibResource
@@ -45,7 +44,7 @@ class BibFileStorage(val rootFolder: File) : BibDataStorage {
     override fun storeAlmaMarc(bookId: AlmaMmsId, marc: AlmaMarc21) =
         cacheInternal(bookId, FOLDER_MARC21, XML, marc)
 
-    override fun storeResource(bookId: HbzId, book: BibResource) =
+    override fun storeResource(bookId: AlmaMmsId, book: BibResource) =
         cacheInternal(bookId, FOLDER_RESOURCES, Json, book)
 
     private inline fun <reified T> cacheInternal(
@@ -58,10 +57,10 @@ class BibFileStorage(val rootFolder: File) : BibDataStorage {
         val cacheFile = File(cacheFolder, bookId.id)
 
         val dataSerial = encoder.encodeToString(data)
-        FileUtils.encodeGzipStream(cacheFile.outputStream()).use { it.appendLine(dataSerial) }
+        cacheFile.writeText(dataSerial)
     }
 
-    override fun loadResource(hbzId: HbzId): BibResource? = loadInternal(hbzId, FOLDER_RESOURCES, Json)
+    override fun loadResource(almaMmsId: AlmaMmsId): BibResource? = loadInternal(almaMmsId, FOLDER_RESOURCES, Json)
 
     override fun loadAlmaMarc(almaMmsId: AlmaMmsId): AlmaMarc21? = loadInternal(almaMmsId, FOLDER_MARC21, XML)
 

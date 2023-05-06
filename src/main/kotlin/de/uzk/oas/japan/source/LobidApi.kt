@@ -49,10 +49,13 @@ class LobidApi(val storage: BibDataStorage) : BibDataSource, BibInstitutionSourc
         }
     }
 
-    override fun loadResource(hbzId: HbzId): BibResource? {
-        return storage.loadResource(hbzId)
-            ?: fetchAndStore<BibResource>("resources", hbzId, Json) { storage.storeResource(hbzId, it) }
+    override fun loadResource(almaMmsId: AlmaMmsId): BibResource? {
+        return storage.loadResource(almaMmsId)
+            ?: fetchAndStore<BibResource>("resources", almaMmsId, Json) { storage.storeResource(almaMmsId, it) }
     }
+
+    fun loadResource(hbzId: HbzId) =
+        fetchAndStore<BibResource>("resources", hbzId, Json)
 
     override fun loadAlmaMarc(almaMmsId: AlmaMmsId): AlmaMarc21? {
         return storage.loadAlmaMarc(almaMmsId)

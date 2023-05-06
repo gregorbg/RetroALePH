@@ -7,7 +7,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Location(
     @SerialName("type") @Serializable(with = ListWrappingSerializer::class) val types: List<String>,
+    val description: String? = null,
     val address: Address,
-    @SerialName("openingHoursSpecification") val openingHours: OpeningHours,
+    @SerialName("openingHoursSpecification") val openingHours: OpeningHours? = null,
     @SerialName("geo") val geography: Geography,
 )

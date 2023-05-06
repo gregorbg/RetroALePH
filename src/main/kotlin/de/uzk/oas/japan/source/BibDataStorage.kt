@@ -8,6 +8,6 @@ import de.uzk.oas.japan.catalogue.raw.marc.AlmaMarc21
 
 interface BibDataStorage : BibDataSource {
     fun storeBestand(institutionIsil: IsilSeal, lobidBestand: List<BibResource>)
-    fun storeResource(bookId: HbzId, book: BibResource)
+    fun storeResource(bookId: AlmaMmsId, book: BibResource)
     fun storeAlmaMarc(bookId: AlmaMmsId, marc: AlmaMarc21)
 }

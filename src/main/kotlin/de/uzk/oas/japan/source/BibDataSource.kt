@@ -8,6 +8,6 @@ import de.uzk.oas.japan.catalogue.raw.marc.AlmaMarc21
 
 interface BibDataSource {
     fun loadBestand(institutionIsil: IsilSeal): List<BibResource>?
-    fun loadResource(hbzId: HbzId): BibResource?
+    fun loadResource(almaMmsId: AlmaMmsId): BibResource?
     fun loadAlmaMarc(almaMmsId: AlmaMmsId): AlmaMarc21?
 }

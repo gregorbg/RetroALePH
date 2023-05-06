@@ -8,5 +8,5 @@ import kotlinx.serialization.Serializable
 data class IntlLabelResource(
     val id: String,
     @SerialName("type") @Serializable(with = ListWrappingSerializer::class) val types: List<String> = emptyList(),
-    val intlLabels: Map<String, String> = emptyMap(),
+    @SerialName("label") val intlLabels: Map<String, String> = emptyMap(),
 )
