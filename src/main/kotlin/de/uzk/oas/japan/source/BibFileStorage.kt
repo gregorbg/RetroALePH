@@ -3,6 +3,7 @@ package de.uzk.oas.japan.source
 import de.uzk.oas.japan.catalogue.AlmaMmsId
 import de.uzk.oas.japan.catalogue.HbzId
 import de.uzk.oas.japan.catalogue.IdProvider
+import de.uzk.oas.japan.catalogue.IsilSeal
 import de.uzk.oas.japan.catalogue.lobid.BibResource
 import de.uzk.oas.japan.catalogue.raw.marc.AlmaMarc21
 import de.uzk.oas.japan.util.FileUtils
@@ -18,11 +19,11 @@ class BibFileStorage(val rootFolder: File) : BibDataStorage {
         rootFolder.mkdirs()
     }
 
-    private fun bestandFileFor(institutionId: String) =
-        File(this.rootFolder, "${institutionId}.bestand.hbz")
+    private fun bestandFileFor(institutionIsil: IsilSeal) =
+        File(this.rootFolder, "${institutionIsil.id}.bestand.hbz")
 
-    override fun loadBestand(institutionId: String): List<BibResource>? {
-        val bestandFile = bestandFileFor(institutionId)
+    override fun loadBestand(institutionIsil: IsilSeal): List<BibResource>? {
+        val bestandFile = bestandFileFor(institutionIsil)
 
         if (!bestandFile.exists()) {
             return null
@@ -33,8 +34,8 @@ class BibFileStorage(val rootFolder: File) : BibDataStorage {
         }
     }
 
-    override fun storeBestand(institutionId: String, lobidBestand: List<BibResource>) {
-        val bestandFile = bestandFileFor(institutionId)
+    override fun storeBestand(institutionIsil: IsilSeal, lobidBestand: List<BibResource>) {
+        val bestandFile = bestandFileFor(institutionIsil)
 
         FileUtils.encodeGzipStream(bestandFile.outputStream()).use { writer ->
             lobidBestand.forEach { writer.appendLine(Json.encodeToString(it)) }

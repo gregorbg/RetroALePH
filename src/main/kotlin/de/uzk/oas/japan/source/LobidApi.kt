@@ -3,6 +3,8 @@ package de.uzk.oas.japan.source
 import de.uzk.oas.japan.catalogue.AlmaMmsId
 import de.uzk.oas.japan.catalogue.HbzId
 import de.uzk.oas.japan.catalogue.IdProvider
+import de.uzk.oas.japan.catalogue.IsilSeal
+import de.uzk.oas.japan.catalogue.lobid.BibInstitution
 import de.uzk.oas.japan.catalogue.lobid.BibResource
 import de.uzk.oas.japan.catalogue.raw.marc.AlmaMarc21
 import de.uzk.oas.japan.util.FileUtils
@@ -22,9 +24,9 @@ import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.serialization.XML
 import kotlin.io.use
 
-class LobidApi(val storage: BibDataStorage) : BibDataSource {
-    override fun loadBestand(institutionId: String): List<BibResource> {
-        return storage.loadBestand(institutionId) ?: runBlocking {
+class LobidApi(val storage: BibDataStorage) : BibDataSource, BibInstitutionSource {
+    override fun loadBestand(institutionIsil: IsilSeal): List<BibResource> {
+        return storage.loadBestand(institutionIsil) ?: runBlocking {
             KTOR_CLIENT.use { ktor ->
                 val gzipBytes = ktor.get {
                     url {
@@ -33,7 +35,7 @@ class LobidApi(val storage: BibDataStorage) : BibDataSource {
 
                         appendPathSegments("resources", "search")
 
-                        parameter("owner", institutionId)
+                        parameter("owner", institutionIsil.id)
                         parameter("format", "jsonl")
                     }
 
@@ -42,7 +44,7 @@ class LobidApi(val storage: BibDataStorage) : BibDataSource {
 
                 FileUtils.decodeGzipStream(gzipBytes.toInputStream()).useLines { lines ->
                     lines.map { Json.decodeFromString<BibResource>(it) }.toList()
-                }.also { storage.storeBestand(institutionId, it) }
+                }.also { storage.storeBestand(institutionIsil, it) }
             }
         }
     }
@@ -57,11 +59,15 @@ class LobidApi(val storage: BibDataStorage) : BibDataSource {
             ?: fetchAndStore<AlmaMarc21>("marcxml", almaMmsId, XML) { storage.storeAlmaMarc(almaMmsId, it) }
     }
 
+    override fun loadInstitution(institutionIsil: IsilSeal): BibInstitution? {
+        return fetchAndStore("organisations", institutionIsil, Json)
+    }
+
     private inline fun <reified T> fetchAndStore(
         subPath: String,
         bookId: IdProvider,
         decoder: StringFormat,
-        crossinline cacheFn: (T) -> Unit
+        crossinline cacheFn: (T) -> Unit = {}
     ): T? {
         return try {
             runBlocking {
