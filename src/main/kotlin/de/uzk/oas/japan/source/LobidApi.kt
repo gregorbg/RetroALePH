@@ -24,9 +24,13 @@ import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.serialization.XML
 import kotlin.io.use
 
-class LobidApi(val storage: BibDataStorage) : BibDataSource, BibInstitutionSource {
+class LobidApi(
+    val holdingStorage: BibHoldingStorage<BibResource>,
+    val itemStorage: BibItemStorage<AlmaMmsId, BibResource>,
+    val rawDataStorage: BibItemStorage<AlmaMmsId, AlmaMarc21>,
+) : BibHoldingSource<BibResource>, BibItemSource<AlmaMmsId, BibResource>, BibInstitutionSource {
     override fun loadBestand(institutionIsil: IsilSeal): List<BibResource> {
-        return storage.loadBestand(institutionIsil) ?: runBlocking {
+        return holdingStorage.loadBestand(institutionIsil) ?: runBlocking {
             KTOR_CLIENT.use { ktor ->
                 val gzipBytes = ktor.get {
                     url {
@@ -44,22 +48,22 @@ class LobidApi(val storage: BibDataStorage) : BibDataSource, BibInstitutionSourc
 
                 FileUtils.decodeGzipStream(gzipBytes.toInputStream()).useLines { lines ->
                     lines.map { Json.decodeFromString<BibResource>(it) }.toList()
-                }.also { storage.storeBestand(institutionIsil, it) }
+                }.also { holdingStorage.storeBestand(institutionIsil, it) }
             }
         }
     }
 
-    override fun loadResource(almaMmsId: AlmaMmsId): BibResource? {
-        return storage.loadResource(almaMmsId)
-            ?: fetchAndStore<BibResource>("resources", almaMmsId, Json) { storage.storeResource(almaMmsId, it) }
+    override fun loadResource(id: AlmaMmsId): BibResource? {
+        return itemStorage.loadResource(id)
+            ?: fetchAndStore<BibResource>("resources", id, Json) { itemStorage.storeResource(id, it) }
     }
 
     fun loadResource(hbzId: HbzId) =
         fetchAndStore<BibResource>("resources", hbzId, Json)
 
-    override fun loadAlmaMarc(almaMmsId: AlmaMmsId): AlmaMarc21? {
-        return storage.loadAlmaMarc(almaMmsId)
-            ?: fetchAndStore<AlmaMarc21>("marcxml", almaMmsId, XML) { storage.storeAlmaMarc(almaMmsId, it) }
+    fun loadAlmaMarc(almaMmsId: AlmaMmsId): AlmaMarc21? {
+        return rawDataStorage.loadResource(almaMmsId)
+            ?: fetchAndStore<AlmaMarc21>("marcxml", almaMmsId, XML) { rawDataStorage.storeResource(almaMmsId, it) }
     }
 
     override fun loadInstitution(institutionIsil: IsilSeal): BibInstitution? {
